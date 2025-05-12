@@ -13,13 +13,15 @@ import Myhome from "./Components/UserDashboard/Myhome";
 import Courses from "./Components/UserDashboard/Courses";
 import MyCourses from "./Components/UserDashboard/MyCourses";
 import Agreement from "./Components/UserDashboard/Agreement";
-import UserDashboard from "./Components/UserDashboard";
+import UserDashboard from "./Components/UserDashboard/UserDashboard";
 import AboutUs from "./Components/AboutUs";
 import Pricing from "./Components/Pricing";
 import Casestudies from "./Components/Casestudies";
 import Termstouse from "./Components/Termstouse";
 import Sla from "./Components/Sla";
 import Privacypolicy from "./Components/Privacypolicy";
+import Useragreement from "./Components/UserDashboard/Useragreement";
+import ForgotPassword from "./Components/ForgotPassword";
 
 
 
@@ -48,6 +50,8 @@ const AppContent = () => {
         <Route path="/terms" element={<Termstouse />} />
         <Route path="/sla" element={<Sla />} />
         <Route path="/privacy" element={<Privacypolicy/>} />
+        <Route path="/useragreement"element={<Useragreement />}/>
+        <Route path="/forgot-password" element={<ForgotPassword />} /> 
 
         {/* User Dashboard Routes */}
         <Route path="/user-dashboard" element={<UserDashboard />}>

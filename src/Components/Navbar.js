@@ -21,7 +21,7 @@ const Navbar = () => {
     <div className="h-24 w-32 overflow-hidden">
       <Link to="/">
         {/* <img src={logo} alt="Logo" className="h-38 w-46 object-contain" /> */}
-        <img src={logo} alt="Logo" className="h-28 w-48 object-contain" />
+        <img src={logo} alt="Logo" className="h-38 w-68 object-contain mb-12" />
       </Link>
     </div>
   

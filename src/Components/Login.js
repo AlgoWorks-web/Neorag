@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; 
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -13,15 +13,17 @@ const Login = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-   
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setIsSuccess(null);
-  
+
     try {
       const response = await axios.post("https://hydersoft.com/api/login", formData);
-  
+      // const response = await axios.post("http://127.0.0.1:8000/api/login", formData);
+      
+
       if (response.data.success) {
         localStorage.setItem("authToken", response.data.token);
         setMessage("Login successful!");
@@ -44,7 +46,7 @@ const Login = () => {
       setIsSuccess(false);
     }
   };
-  
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -90,10 +92,13 @@ const Login = () => {
         <p className="mt-4 text-center">
           Don't have an account? <a href="/signup" className="text-blue-500">Register</a>
         </p>
+        <p className="mt-2 text-center">
+          <a href="/forgot-password" className="text-blue-500 hover:underline">Forgotten password?</a>
+        </p>
+
       </div>
     </div>
   );
 };
 
 export default Login;
-
