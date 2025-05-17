@@ -1,15 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminLogin } from '../../api/mockAuth'; // Import the mock API function
+import { adminLogin } from '../../api/mockAuth';
 
 const AdminLogin = () => {
-  // State declarations
-  const [email, setEmail] = useState('admin@neorag.com');
-  const [password, setPassword] = useState('admin123');
+  // State declarations with empty defaults
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // Navigation hook
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -17,8 +16,14 @@ const AdminLogin = () => {
     setLoading(true);
     setError('');
 
+    // Basic validation
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both email and password');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Call the mock API function
       const response = await adminLogin({ email, password });
       
       if (response.success) {
@@ -55,7 +60,9 @@ const AdminLogin = () => {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter admin email"
               required
+              autoComplete="username"
             />
           </div>
           
@@ -69,15 +76,19 @@ const AdminLogin = () => {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
               required
+              autoComplete="current-password"
             />
           </div>
           
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !email || !password}
             className={`w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition ${
               loading ? 'opacity-70 cursor-not-allowed' : ''
+            } ${
+              !email || !password ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
             {loading ? 'Logging in...' : 'Login'}
