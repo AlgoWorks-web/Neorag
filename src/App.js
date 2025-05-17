@@ -23,9 +23,19 @@ import Useragreement from "./Components/UserDashboard/Useragreement";
 import ForgotPassword from "./Components/ForgotPassword";
 import Settings from "./Components/UserDashboard/Settings";
 
+// Admin Components
+import AdminDashboard from "./Components/Admin/AdminDashboard";
+import AdminLogin from "./Components/Admin/AdminLogin";
+import AdminHome from "./Components/Admin/AdminHome";
+import AdminUsers from "./Components/Admin/AdminUsers";
+import AdminCourses from "./Components/Admin/AdminCourses";
+import AdminSettings from "./Components/Admin/AdminSettings";
+import AdminReports from "./Components/Admin/AdminReports";
+
 const AppContent = () => {
   const location = useLocation();
-  const hideNavAndFooter = location.pathname.startsWith("/user-dashboard");
+  const hideNavAndFooter = location.pathname.startsWith("/user-dashboard") || 
+                         location.pathname.startsWith("/admin");
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -57,6 +67,16 @@ const AppContent = () => {
           <Route path="courses" element={<Courses />} />
           <Route path="mycourse" element={<MyCourses />} />
           <Route path="Settings" element={<Settings />} />
+        </Route>
+
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin-home" element={<AdminDashboard />}>
+          <Route index element={<AdminHome />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="courses" element={<AdminCourses />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="reports" element={<AdminReports />} />
         </Route>
       </Routes>
 
