@@ -12,7 +12,6 @@ import ContactUs from './Components/Contact';
 import Myhome from "./Components/UserDashboard/Myhome";
 import Courses from "./Components/UserDashboard/Courses";
 import MyCourses from "./Components/UserDashboard/MyCourses";
-import Agreement from "./Components/UserDashboard/Agreement";
 import UserDashboard from "./Components/UserDashboard/UserDashboard";
 import AboutUs from "./Components/AboutUs";
 import Pricing from "./Components/Pricing";
@@ -22,8 +21,7 @@ import Sla from "./Components/Sla";
 import Privacypolicy from "./Components/Privacypolicy";
 import Useragreement from "./Components/UserDashboard/Useragreement";
 import ForgotPassword from "./Components/ForgotPassword";
-
-
+import Settings from "./Components/UserDashboard/Settings";
 
 const AppContent = () => {
   const location = useLocation();
@@ -44,21 +42,21 @@ const AppContent = () => {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/about" element={<AboutUs/>}/>
-        <Route path="/pricing" element={<Pricing/>}/>
-        <Route path="/case-studies" element={<Casestudies/>}/>
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/case-studies" element={<Casestudies />} />
         <Route path="/terms" element={<Termstouse />} />
         <Route path="/sla" element={<Sla />} />
-        <Route path="/privacy" element={<Privacypolicy/>} />
-        <Route path="/useragreement"element={<Useragreement />}/>
-        <Route path="/forgot-password" element={<ForgotPassword />} /> 
+        <Route path="/privacy" element={<Privacypolicy />} />
+        <Route path="/useragreement" element={<Useragreement />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* User Dashboard Routes */}
         <Route path="/user-dashboard" element={<UserDashboard />}>
           <Route path="home" element={<Myhome />} />
           <Route path="courses" element={<Courses />} />
           <Route path="mycourse" element={<MyCourses />} />
-          <Route path="agreement" element={<Agreement />} />
+          <Route path="Settings" element={<Settings />} />
         </Route>
       </Routes>
 

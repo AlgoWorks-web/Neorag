@@ -33,7 +33,7 @@ const ContactUs = () => {
 
     return (
         <div>
-            <div className="relative w-full h-[300px]">
+            <div className="relative w-full h-[350px]">
                 {/* Background Image */}
                 <img
                     src={contact} // Update with correct path

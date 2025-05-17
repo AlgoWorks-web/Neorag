@@ -1,5 +1,5 @@
 import { FaFacebookF, FaLinkedinIn, FaTwitter, FaInstagram } from "react-icons/fa";
-import logo from "../Assets/Neoraglogo.png";
+import logo from "../Assets/Solutionsllc.png";
 import { Link } from "react-router-dom";
 
 const Footer = () => {
@@ -11,24 +11,25 @@ const Footer = () => {
                     <img
                         src={logo}
                         alt="Neorag Consultancy"
-                        className="w-40"
+                        className="w-52 h-52"
                     />
                     <p className="text-gray-500">Welcome to our consultancy.</p>
                     <div className="border-b w-full" />
                     <div className="space-y-2 font-semibold">
-                        <p className="flex items-center space-x-2 text-blue-900">
-                            <span>📞</span>
-                            <span>+1 73826 24522</span>
-                        </p>
-                        <p className="flex items-center space-x-2 text-blue-900">
-                            <span>📧</span>
-                            <span>corporate@neorag.com</span>
-                        </p>
-                        <p className="flex items-center space-x-2 text-blue-900">
-                            <span>📍</span>
-                            <span>Euless, Texas</span>
-                        </p>
-                    </div>
+                    <p className="flex items-center space-x-2 text-blue-900">
+                    <span>📞</span>
+                    <span>+1 73826 24522</span>
+                   </p>
+                   <p className="flex items-center space-x-2 text-blue-900">
+                    <span>📧</span>
+                    <span>corporate@neorag.com</span>
+                   </p>
+                    <p className="flex items-start space-x-2 text-blue-900">
+                    <span>📍</span>
+                     <span>13208 SPINNING GLEN ST EULESS, TX 76040</span>
+                    </p>
+                </div>
+
                 </div>
 
                 {/* Explore */}
