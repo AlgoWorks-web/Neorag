@@ -7,7 +7,6 @@ import call from "../Assets/call.png";
 import email from "../Assets/email.jpg";
 import address from "../Assets/address.jpg";
 import Getintouch from "./Getintouch";
-import Map from "./Map";
 
 
 
@@ -103,16 +102,18 @@ const ContactUs = () => {
                                 className="w-96 h-96 object-cover rounded-lg"
                             />
                             <div className="absolute bottom-0 left-0 w-42 bg-blue-600 text-white p-5 rounded-b-lg">
-                                <FaMapMarkerAlt size={30} />
-                                <h3 className="text-lg font-semibold mt-2">REACH US</h3>
-                                <p className="text-lg font-bold">Euless, Texas</p>
+                                <FaMapMarkerAlt size={25} />
+                                <h3 className="text-sm font-semibold mt-2">REACH US</h3>
+                                <p className="text-md font-bold">13208 Spinning Glen St</p>
+                                <p className="text-md font-bold">Euless, Texas</p>
                             </div>
                         </div>
 
                     </div>
                 </section>
                 <Getintouch />
-                <Map />
+                {/* <Map />  */ }
+                
 
             </div>
         </div>

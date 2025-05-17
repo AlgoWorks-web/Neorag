@@ -127,7 +127,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaBars, FaTimes } from "react-icons/fa";
-import logo from "../Assets/Neoraglogo.png";
+import logo from "../Assets/CompanyLogo.jpg";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -144,12 +144,14 @@ const Navbar = () => {
   return (
     <nav className="flex items-center justify-between px-6 py-2 bg-white shadow-md w-full relative md:py-4 md:h-24">
       {/* Left: Logo */}
-      <div className="h-12 w-32 overflow-hidden md:h-20 md:w-auto">
+
+      {/* Logo Container - Updated */}
+      <div className="h-16 w-40 overflow-hidden md:h-12 md:w-48">
         <Link to="/">
           <img
             src={logo}
-            alt="Logo"
-            className="h-16 w-auto object-contain md:h-20"
+            alt="Neorag Logo"
+            className="h-full w-auto object-contain" // Let the image scale naturally
           />
         </Link>
       </div>
@@ -204,7 +206,7 @@ const Navbar = () => {
             <img
               src={logo}
               alt="Logo"
-              className="h-8 w-auto object-contain"
+              className="h-10 w-auto object-contain"
             />
           </Link>
           <button

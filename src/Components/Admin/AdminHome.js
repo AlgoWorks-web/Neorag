@@ -19,7 +19,6 @@ const AdminHome = () => {
       <GeneralStats />
       <CountriesTable />
       <RecentUsers />
-      <AdminFooter />
     </div>
   );
 }
