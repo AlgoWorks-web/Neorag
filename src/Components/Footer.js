@@ -83,7 +83,7 @@ const Footer = () => {
 
             {/* Footer Bottom */}
             <div className="container mx-auto flex flex-col md:flex-row justify-between items-center mt-8 border-t pt-6 text-sm text-gray-600">
-                <p>© 2024 Neorag Consulting Inc. All Rights Reserved</p>
+                <p>© 2025 Neorag Solutions LLC. All Rights Reserved</p>
                 <div className="flex space-x-4 mt-4 md:mt-0">
                     <a href="#" className="bg-blue-800 p-2 rounded-full text-white"><FaFacebookF /></a>
                     <a href="#" className="bg-blue-600 p-2 rounded-full text-white"><FaLinkedinIn /></a>
