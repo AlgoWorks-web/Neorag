@@ -22,7 +22,9 @@ import Privacypolicy from "./Components/Privacypolicy";
 import Useragreement from "./Components/UserDashboard/Useragreement";
 import ForgotPassword from "./Components/ForgotPassword";
 import Settings from "./Components/UserDashboard/Settings";
- 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 // Admin Components
 import AdminDashboard from "./Components/Admin/AdminDashboard";
@@ -36,8 +38,8 @@ import AdminReports from "./Components/Admin/AdminReports";
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavAndFooter = location.pathname.startsWith("/user-dashboard") || 
-                         location.pathname.startsWith("/admin");
+  const hideNavAndFooter = location.pathname.startsWith("/user-dashboard") ||
+    location.pathname.startsWith("/admin");
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -63,11 +65,13 @@ const AppContent = () => {
         <Route path="/useragreement" element={<Useragreement />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
+
         {/* User Dashboard Routes */}
         <Route path="/user-dashboard" element={<UserDashboard />}>
           <Route path="home" element={<Myhome />} />
           <Route path="courses" element={<Courses />} />
           <Route path="mycourse" element={<MyCourses />} />
+           <Route path="pricing" element={<Pricing minimal={true} />} />
           <Route path="Settings" element={<Settings />} />
         </Route>
 
@@ -79,7 +83,7 @@ const AppContent = () => {
           <Route path="courses" element={<AdminCourses />} />
           <Route path="plans" element={<AdminPlans />} />
           <Route path="settings" element={<AdminSettings />} />
-          <Route path="reports" element={<AdminReports />} />     
+          <Route path="reports" element={<AdminReports />} />
         </Route>
       </Routes>
 
@@ -97,6 +101,7 @@ function App() {
   return (
     <Router>
       <AppContent />
+      <ToastContainer position="top-center" autoClose={3000} />
     </Router>
   );
 }

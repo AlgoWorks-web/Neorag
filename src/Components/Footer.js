@@ -1,94 +1,110 @@
 import { FaFacebookF, FaLinkedinIn, FaTwitter, FaInstagram } from "react-icons/fa";
-import logo from "../Assets/Solutionsllc.png";
+import logo from "../Assets/Neoraglogo.png";
 import { Link } from "react-router-dom";
+
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
 const Footer = () => {
     return (
         <footer className="bg-white text-gray-800 py-10 px-6 md:px-20 border-t">
-            <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+                
                 {/* Company Info */}
                 <div className="flex flex-col space-y-4">
                     <img
                         src={logo}
-                        alt="Neorag Consultancy"
-                        className="w-52 h-52"
+                        alt="Neorag Consultancy Logo"
+                        className="w-40 h-40 md:w-56 md:h-56 object-contain"
                     />
-                    <p className="text-gray-500">Welcome to our consultancy.</p>
+                    <p className="text-gray-500 text-sm">Welcome to our consultancy.</p>
                     <div className="border-b w-full" />
-                    <div className="space-y-2 font-semibold">
-                    <p className="flex items-center space-x-2 text-blue-900">
-                    <span>📞</span>
-                    <span>+1 73826 24522</span>
-                   </p>
-                   <p className="flex items-center space-x-2 text-blue-900">
-                    <span>📧</span>
-                    <span>corporate@neorag.com</span>
-                   </p>
-                    <p className="flex items-start space-x-2 text-blue-900">
-                    <span>📍</span>
-                     <span>13208 SPINNING GLEN ST EULESS, TX 76040</span>
-                    </p>
-                </div>
-
+                    <div className="space-y-2 text-sm font-medium text-blue-900">
+                        <p className="flex items-center space-x-2">
+                            <span>📞</span>
+                            <span>+1 73826 24522</span>
+                        </p>
+                        <p className="flex items-center space-x-2">
+                            <span>📧</span>
+                            <span>corporate@neorag.com</span>
+                        </p>
+                        <p className="flex items-start space-x-2">
+                            <span>📍</span>
+                            <span>13208 Spinning Glen St, Euless, TX 76040</span>
+                        </p>
+                    </div>
                 </div>
 
                 {/* Explore */}
                 <div>
-                    <h2 className="font-bold text-gray-800 text-2xl">EXPLORE</h2>
-                    <ul className="space-y-2 mt-2 font-semibold">
-                        <li><Link to="/" className="text-blue-900 hover:underline">Home</Link></li>
-                        <li><Link to="/about" className="text-blue-900 hover:underline">About Us</Link></li>
-                        <li><Link to="/services" className="text-blue-900 hover:underline">Services</Link></li>
-                        <li><Link to="/case-studies" className="text-blue-900 hover:underline">Case Studies</Link></li>
-                        <li><Link to="/pricing" className="text-blue-900 hover:underline">Pricing</Link></li>
-                        <li><Link to="/contact" className="text-blue-900 hover:underline">Contact</Link></li> 
-                        
+                    <h2 className="font-bold text-xl text-gray-800 mb-4">Explore</h2>
+                    <ul className="space-y-2 text-blue-900 font-semibold">
+                        {[
+                            { name: "Home", to: "/" },
+                            { name: "About Us", to: "/about" },
+                            { name: "Services", to: "/services" },
+                            { name: "Case Studies", to: "/case-studies" },
+                            { name: "Pricing", to: "/pricing" },
+                            { name: "Contact", to: "/contact" },
+                        ].map(({ name, to }) => (
+                            <li key={to}>
+                                <Link to={to} onClick={scrollToTop} className="hover:underline">
+                                    {name}
+                                </Link>
+                            </li>
+                        ))}
                     </ul>
                 </div>
 
+                {/* Policies */}
                 <div>
-                    <ul className="space-y-2 mt-8 font-semibold">
-                        <li><Link to="/" className="text-blue-900 hover:underline">Support</Link></li>
-                        <li><Link to="/terms" className="text-blue-900 hover:underline">Terms of use</Link></li>
-                        <li><Link to="/sla" className="text-blue-900 hover:underline">Service Level Agreement (SLA)</Link></li>
-                        <li><Link to="/privacy" className="text-blue-900 hover:underline">Privacy policy</Link></li>
-                        <li><Link to="/contact" className="text-blue-900 hover:underline">Help</Link></li>
-
-
-
+                    <h2 className="font-bold text-xl text-gray-800 mb-4">Support</h2>
+                    <ul className="space-y-2 text-blue-900 font-semibold">
+                        {[
+                            { name: "Support", to: "/" },
+                            { name: "Terms of Use", to: "/terms" },
+                            { name: "Service Level Agreement (SLA)", to: "/sla" },
+                            { name: "Privacy Policy", to: "/privacy" },
+                            { name: "Help", to: "/contact" },
+                        ].map(({ name, to }) => (
+                            <li key={to}>
+                                <Link to={to} onClick={scrollToTop} className="hover:underline">
+                                    {name}
+                                </Link>
+                            </li>
+                        ))}
                     </ul>
                 </div>
 
                 {/* Newsletter */}
-                <div className=" p-2 w-80 justify-start">
-                    <h2 className="font-bold text-gray-800 text-2xl">NEWSLETTER</h2>
-                    <div className="bg-blue-50 h-48 w-96 p-10 mr-12 md:mr-8 mt-4">
-                    <p className="text-sm  text-black font-semibold ">Subscribe for Newsletter</p>
-                    <div className="mt-4 flex">
-                    <div className="mt-4 flex">
-                <input
-                     type="email"
-                     placeholder="Email address"
-                     className="flex-grow p-2 border text-gray-700"
-                />
-                <button className="bg-gray-700 text-white px-4 py-2 -ml-12">
-                     REGISTER
-                </button>
-                </div>
-
-                    </div>
+                <div>
+                    <h2 className="font-bold text-xl text-gray-800 mb-4">Newsletter</h2>
+                    <div className="bg-blue-50 p-6 rounded-lg shadow-sm max-w-sm">
+                        <p className="text-sm font-medium text-black mb-4">Subscribe to our newsletter</p>
+                        <form className="flex">
+                            <input
+                                type="email"
+                                placeholder="Email address"
+                                className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md text-gray-700 text-sm"
+                            />
+                            <button
+                                type="submit"
+                                className="bg-gray-700 text-white px-4 py-2 rounded-r-md text-sm font-semibold"
+                            >
+                                Register
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
 
             {/* Footer Bottom */}
-            <div className="container mx-auto flex flex-col md:flex-row justify-between items-center mt-8 border-t pt-6 text-sm text-gray-600">
-                <p>© 2025 Neorag Solutions LLC. All Rights Reserved</p>
+            <div className="container mx-auto mt-10 border-t pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
+                <p>© 2025 Neorag Solutions LLC. All rights reserved.</p>
                 <div className="flex space-x-4 mt-4 md:mt-0">
-                    <a href="#" className="bg-blue-800 p-2 rounded-full text-white"><FaFacebookF /></a>
-                    <a href="#" className="bg-blue-600 p-2 rounded-full text-white"><FaLinkedinIn /></a>
-                    <a href="#" className="bg-blue-400 p-2 rounded-full text-white"><FaTwitter /></a>
-                    <a href="#" className="bg-black p-2 rounded-full text-white"><FaInstagram /></a>
+                    <a href="#" aria-label="Facebook" className="bg-blue-800 p-2 rounded-full text-white"><FaFacebookF /></a>
+                    <a href="#" aria-label="LinkedIn" className="bg-blue-600 p-2 rounded-full text-white"><FaLinkedinIn /></a>
+                    <a href="#" aria-label="Twitter" className="bg-blue-400 p-2 rounded-full text-white"><FaTwitter /></a>
+                    <a href="#" aria-label="Instagram" className="bg-black p-2 rounded-full text-white"><FaInstagram /></a>
                 </div>
             </div>
         </footer>

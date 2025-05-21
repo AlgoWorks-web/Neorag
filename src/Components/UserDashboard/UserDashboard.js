@@ -130,6 +130,7 @@ const DashboardLayout = () => {
           <nav className="space-y-6">
             <Link to="home" className="flex items-center gap-3 hover:text-white"><FiHome /> Home</Link>
             <Link to="courses" className="flex items-center gap-3 hover:text-white"><FiBook /> Courses</Link>
+            <Link to="pricing" className="flex items-center gap-3 hover:text-white"><FiBook /> Pricing</Link>
             <Link to="mycourse" className="flex items-center gap-3 hover:text-white"><FiActivity /> MyCourses</Link>
           </nav>
         </div>
