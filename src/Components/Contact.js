@@ -112,13 +112,6 @@ const ContactUs = () => {
                     </div>
                 </section>
                 <Getintouch />
-<<<<<<< HEAD
-                {/* <Map />  */ }
-                
-=======
-                {/* <Map /> */}
->>>>>>> d7ac929 (Your commit message here)
-
             </div>
         </div>
     );
