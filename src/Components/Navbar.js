@@ -9,6 +9,7 @@ const Navbar = () => {
   const navItems = [
     { name: "Home", path: "/" },
     { name: "About", path: "/about" },
+    { name: "Business", path: "/business" }, // Added Business link
     { name: "Services", path: "/services" },
     { name: "Case Studies", path: "/case-studies" },
     { name: "Pricing", path: "/pricing" },
@@ -27,7 +28,6 @@ const Navbar = () => {
           />
         </Link>
       </div>
-
 
       {/* Mobile Menu Button */}
       <button
@@ -67,10 +67,11 @@ const Navbar = () => {
         </Link>
       </div>
 
-      {/* Mobile Menu (Only shown when menuOpen is true) */}
+      {/* Mobile Menu */}
       <div
-        className={`fixed inset-0 z-50 bg-white shadow-lg transform ${menuOpen ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 md:hidden`}
+        className={`fixed inset-0 z-50 bg-white shadow-lg transform ${
+          menuOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 md:hidden`}
       >
         {/* Close button inside menu */}
         <div className="flex justify-between items-center p-4">

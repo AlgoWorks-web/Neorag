@@ -28,15 +28,13 @@ const ContactUs = () => {
 
     return (
         <div>
+            {/* Banner Section */}
             <div className="relative w-full h-[350px]">
-                {/* Background Image */}
                 <img
                     src={contact}
                     alt="Contact Us Banner"
                     className="w-full h-full object-cover"
                 />
-
-                {/* Overlay */}
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <h1
                         id="contact-text"
@@ -47,14 +45,13 @@ const ContactUs = () => {
                 </div>
             </div>
 
+            {/* Contact Info Section */}
             <section className="py-10 px-5 bg-white">
-                {/* Heading */}
                 <div className="text-center mb-8">
                     <h2 className="text-3xl font-bold">REACH OUT</h2>
                     <p className="text-gray-600">We help our clients renew their business</p>
                 </div>
 
-                {/* Cards Container */}
                 <div className="grid md:grid-cols-3 gap-6 justify-center">
                     {/* Call Card */}
                     <div className="relative group">
@@ -105,7 +102,9 @@ const ContactUs = () => {
                 </div>
             </section>
 
+            {/* Get in Touch Form */}
             <Getintouch />
+            {/* Optional: Include map here later */}
             {/* <Map /> */}
         </div>
     );

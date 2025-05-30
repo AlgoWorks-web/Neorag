@@ -5,11 +5,13 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // New state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
     setSuccess(null);
+    setIsSubmitting(true); // Start loading
 
     try {
       const response = await axios.post("https://hydersoft.com/api/forgot-password", { email });
@@ -21,6 +23,8 @@ const ForgotPassword = () => {
     } catch (error) {
       setMessage("Email not found or error sending reset link.");
       setSuccess(false);
+    } finally {
+      setIsSubmitting(false); // Stop loading
     }
   };
 
@@ -37,8 +41,14 @@ const ForgotPassword = () => {
             required
             className="w-full p-2 border rounded mb-4 bg-gray-200"
           />
-          <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition">
-            Send Reset Link
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`w-full p-2 rounded text-white transition ${
+              isSubmitting ? "bg-blue-300 cursor-wait" : "bg-blue-500 hover:bg-blue-600"
+            }`}
+          >
+            {isSubmitting ? "Sending..." : "Send Reset Link"}
           </button>
         </form>
 

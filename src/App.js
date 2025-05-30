@@ -16,6 +16,8 @@ import UserDashboard from "./Components/UserDashboard/UserDashboard";
 import AboutUs from "./Components/AboutUs";
 import Pricing from "./Components/Pricing";
 import Casestudies from "./Components/Casestudies";
+import Business from "./Components/Business";
+import AppointmentForm from "./Components/AppointmentForm";
 import Termstouse from "./Components/Termstouse";
 import Sla from "./Components/Sla";
 import Privacypolicy from "./Components/Privacypolicy";
@@ -59,11 +61,13 @@ const AppContent = () => {
         <Route path="/about" element={<AboutUs />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/case-studies" element={<Casestudies />} />
+        <Route path="/business" element={<Business />} />
         <Route path="/terms" element={<Termstouse />} />
         <Route path="/sla" element={<Sla />} />
         <Route path="/privacy" element={<Privacypolicy />} />
         <Route path="/useragreement" element={<Useragreement />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/book-appointment" element={<AppointmentForm />} />
 
 
         {/* User Dashboard Routes */}
@@ -71,7 +75,7 @@ const AppContent = () => {
           <Route path="home" element={<Myhome />} />
           <Route path="courses" element={<Courses />} />
           <Route path="mycourse" element={<MyCourses />} />
-           <Route path="pricing" element={<Pricing minimal={true} />} />
+          <Route path="pricing" element={<Pricing minimal={true} />} />
           <Route path="Settings" element={<Settings />} />
         </Route>
 
