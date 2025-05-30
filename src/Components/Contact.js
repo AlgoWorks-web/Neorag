@@ -113,11 +113,6 @@ const ContactUs = () => {
                 </section>
                 <Getintouch />
 
-                {/* <Map />  */ }
-        
-                {/* <Map /> */}
-
-
             </div>
         </div>
         
