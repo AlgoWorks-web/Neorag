@@ -1,114 +1,138 @@
-import { FaFacebookF, FaLinkedinIn, FaTwitter, FaInstagram } from "react-icons/fa";
-import logo from "../Assets/Neoraglogo.png";
+// src/Components/Footer.js
+import React from "react";
 import { Link } from "react-router-dom";
-
-const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+import logo from "../Assets/CompanyLogo.jpg";
+import { FaFacebookF, FaLinkedinIn, FaTwitter, FaInstagram, FaYoutube } from "react-icons/fa";
 
 const Footer = () => {
-    return (
-        <footer className="bg-white text-gray-800 py-10 px-6 md:px-20 border-t">
-            <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
-                
-                {/* Company Info */}
-                <div className="flex flex-col space-y-4">
-                    <img
-                        src={logo}
-                        alt="Neorag Consultancy Logo"
-                        className="w-40 h-40 md:w-56 md:h-56 object-contain"
-                    />
-                    <p className="text-gray-500 text-sm">Welcome to our consultancy.</p>
-                    <div className="border-b w-full" />
-                    <div className="space-y-2 text-sm font-medium text-blue-900">
-                        <p className="flex items-center space-x-2">
-                            <span>📞</span>
-                            <span>+1 73826 24522</span>
-                        </p>
-                        <p className="flex items-center space-x-2">
-                            <span>📧</span>
-                            <span>corporate@neorag.com</span>
-                        </p>
-                        <p className="flex items-start space-x-2">
-                            <span>📍</span>
-                            <span>13208 Spinning Glen St, Euless, TX 76040</span>
-                        </p>
-                    </div>
-                </div>
-
-                {/* Explore */}
-                <div>
-                    <h2 className="font-bold text-xl text-gray-800 mb-4">Explore</h2>
-                    <ul className="space-y-2 text-blue-900 font-semibold">
-                        {[
-                            { name: "Home", to: "/" },
-                            { name: "About Us", to: "/about" },
-                            { name: "Services", to: "/services" },
-                            { name: "Case Studies", to: "/case-studies" },
-                            { name: "Pricing", to: "/pricing" },
-                            { name: "Contact", to: "/contact" },
-                        ].map(({ name, to }) => (
-                            <li key={to}>
-                                <Link to={to} onClick={scrollToTop} className="hover:underline">
-                                    {name}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* Policies */}
-                <div>
-                    <h2 className="font-bold text-xl text-gray-800 mb-4">Support</h2>
-                    <ul className="space-y-2 text-blue-900 font-semibold">
-                        {[
-                            { name: "Support", to: "/" },
-                            { name: "Terms of Use", to: "/terms" },
-                            { name: "Service Level Agreement (SLA)", to: "/sla" },
-                            { name: "Privacy Policy", to: "/privacy" },
-                            { name: "Help", to: "/contact" },
-                        ].map(({ name, to }) => (
-                            <li key={to}>
-                                <Link to={to} onClick={scrollToTop} className="hover:underline">
-                                    {name}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* Newsletter */}
-                <div>
-                    <h2 className="font-bold text-xl text-gray-800 mb-4">Newsletter</h2>
-                    <div className="bg-blue-50 p-6 rounded-lg shadow-sm max-w-sm">
-                        <p className="text-sm font-medium text-black mb-4">Subscribe to our newsletter</p>
-                        <form className="flex">
-                            <input
-                                type="email"
-                                placeholder="Email address"
-                                className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md text-gray-700 text-sm"
-                            />
-                            <button
-                                type="submit"
-                                className="bg-gray-700 text-white px-4 py-2 rounded-r-md text-sm font-semibold"
-                            >
-                                Register
-                            </button>
-                        </form>
-                    </div>
-                </div>
+  const currentYear = new Date().getFullYear();
+  
+  return (
+    <footer className="bg-gradient-to-br from-blue-900 to-indigo-900 text-white pt-16 pb-8">
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          
+          {/* Company Info */}
+          <div>
+            <img src={logo} alt="Neorag" className="h-16 w-auto mb-6" />
+            <p className="text-blue-200 mb-6">
+              Empowering the next generation of tech professionals with industry-leading education.
+            </p>
+            <div className="flex space-x-4">
+              {[
+                { icon: <FaFacebookF />, url: "#" },
+                { icon: <FaLinkedinIn />, url: "#" },
+                { icon: <FaTwitter />, url: "#" },
+                { icon: <FaInstagram />, url: "#" },
+                { icon: <FaYoutube />, url: "#" }
+              ].map((social, index) => (
+                <a 
+                  key={index}
+                  href={social.url}
+                  className="bg-blue-800 w-10 h-10 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {social.icon}
+                </a>
+              ))}
             </div>
-
-            {/* Footer Bottom */}
-            <div className="container mx-auto mt-10 border-t pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
-                <p>© 2025 Neorag Solutions LLC. All rights reserved.</p>
-                <div className="flex space-x-4 mt-4 md:mt-0">
-                    <a href="#" aria-label="Facebook" className="bg-blue-800 p-2 rounded-full text-white"><FaFacebookF /></a>
-                    <a href="#" aria-label="LinkedIn" className="bg-blue-600 p-2 rounded-full text-white"><FaLinkedinIn /></a>
-                    <a href="#" aria-label="Twitter" className="bg-blue-400 p-2 rounded-full text-white"><FaTwitter /></a>
-                    <a href="#" aria-label="Instagram" className="bg-black p-2 rounded-full text-white"><FaInstagram /></a>
-                </div>
+          </div>
+          
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-lg font-bold mb-6">Quick Links</h3>
+            <ul className="space-y-3">
+              {[
+                { name: "Home", path: "/" },
+                { name: "Courses", path: "/services" },
+                { name: "Pricing", path: "/pricing" },
+                { name: "About Us", path: "/about" },
+                { name: "Contact", path: "/contact" }
+              ].map((item, index) => (
+                <li key={index}>
+                  <Link 
+                    to={item.path} 
+                    className="text-blue-200 hover:text-white transition-colors"
+                    onClick={() => window.scrollTo(0, 0)} // Scroll to top on navigation
+                  >
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Resources */}
+          <div>
+            <h3 className="text-lg font-bold mb-6">Resources</h3>
+            <ul className="space-y-3">
+              {[
+                { name: "FAQ", path: "/faq" }
+              ].map((item, index) => (
+                <li key={index}>
+                  <Link 
+                    to={item.path} 
+                    className="text-blue-200 hover:text-white transition-colors"
+                    onClick={() => window.scrollTo(0, 0)}
+                  >
+                    {item.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          {/* Newsletter */}
+          <div>
+            <h3 className="text-lg font-bold mb-6">Stay Updated</h3>
+            <p className="text-blue-200 mb-4">
+              Subscribe to our newsletter for course updates and career tips.
+            </p>
+            <form className="flex">
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="flex-grow px-4 py-3 rounded-l-lg text-gray-800 focus:outline-none"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3 rounded-r-lg font-medium hover:from-blue-600 hover:to-indigo-700 transition-all"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </div>
+        
+        {/* Bottom Footer */}
+        <div className="border-t border-blue-800 pt-8 pb-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-blue-300 text-sm mb-4 md:mb-0">
+              &copy; {currentYear} Neorag Solutions LLC. All rights reserved.
+            </p>
+            <div className="flex space-x-6 text-sm">
+              <Link 
+                to="/privacy" 
+                className="text-blue-300 hover:text-white transition-colors"
+                onClick={() => window.scrollTo(0, 0)}
+              >
+                Privacy Policy
+              </Link>
+              <Link 
+                to="/terms" 
+                className="text-blue-300 hover:text-white transition-colors"
+                onClick={() => window.scrollTo(0, 0)}
+              >
+                Terms of Service
+              </Link>
             </div>
-        </footer>
-    );
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;

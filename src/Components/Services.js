@@ -1,273 +1,131 @@
-import React, { useEffect, useState } from "react";
-import Service from "../Assets/Service.png";
-import Icon5 from "../Assets/icon5.png";
-import Icon6 from "../Assets/icon6.png";
-import Read from "../Assets/read.png";
-import Icon7 from "../Assets/icon7.jpg";
-import icon8 from "../Assets/icon8.jpg";
-import hr1 from "../Assets/hr1.jpg";
-import hr2 from "../Assets/hr2.jpg";
-import hr3 from "../Assets/hr3.jpg";
-import read from "../Assets/read.png";
-import footer from "../Assets/footer.png";
-import Stats from "./Stats";
+import React from "react";
+import { Link } from "react-router-dom";
 
-const ServicesPage = () => {
-  const [isVisible, setIsVisible] = useState(false);
+// ✅ Correct image imports from Assets folder
+import webDev from "../Assets/webdev.jpg";
+import dataScience from "../Assets/datascience.jpg";
+import uxDesign from "../Assets/uxdesign.jpg";
+import ai from "../Assets/ai.jpg";
+import business from "../Assets/business.jpg";
+import marketing from "../Assets/marketing.jpg";
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+const Services = () => {
+  const courses = [
+    {
+      id: 1,
+      title: "Full Stack Web Development",
+      description: "Master HTML, CSS, JavaScript, React, Node.js and build real-world projects",
+      image: webDev,
+      duration: "6 months",
+      level: "Beginner to Advanced"
+    },
+    {
+      id: 2,
+      title: "Data Science & Machine Learning",
+      description: "Learn Python, data analysis, visualization, and machine learning algorithms",
+      image: dataScience,
+      duration: "8 months",
+      level: "Intermediate"
+    },
+    {
+      id: 3,
+      title: "UX/UI Design",
+      description: "Master user research, wireframing, prototyping, and design systems",
+      image: uxDesign,
+      duration: "4 months",
+      level: "Beginner"
+    },
+    {
+      id: 4,
+      title: "AI Engineering",
+      description: "Deep dive into neural networks, NLP, computer vision and AI deployment",
+      image: ai,
+      duration: "9 months",
+      level: "Advanced"
+    },
+    {
+      id: 5,
+      title: "Business Analytics",
+      description: "Learn SQL, Tableau, Excel, and data-driven decision making",
+      image: business,
+      duration: "5 months",
+      level: "Beginner"
+    },
+    {
+      id: 6,
+      title: "Digital Marketing",
+      description: "Master SEO, SEM, social media marketing, and analytics",
+      image: marketing,
+      duration: "3 months",
+      level: "Beginner"
+    }
+  ];
 
   return (
-    <div className="px-4  space-y-16 bg-white  text-gray-800">
-      {/* HERO SECTION */}
-      <section
-        className="relative w-full h-[400px] flex items-center justify-center bg-cover bg-center"
-        style={{ backgroundImage: `url(${Service})` }}
-      >
-        <div className="absolute inset-0 bg-black opacity-60 z-10"></div>
-        <h1
-          className={`text-6xl font-bold mt-10 text-white z-20 drop-shadow-lg transition-all duration-700 ease-in-out transform ${
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-          }`}
-        >
-          SERVICES
-        </h1>
-      </section>
-
-      {/* SERVICES SECTION */}
-      <section
-        className="w-full bg-cover bg-center bg-no-repeat py-16"
-        style={{ backgroundImage: `url(${Read})` }}
-      >
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-2 text-black">SERVICES</h1>
-          <p className="text-lg text-black/90">
-            The best business consulting firm you can count on!
+    <div className="pt-24 pb-20">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-900 to-indigo-900 text-white py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">Explore Our Courses</h1>
+          <p className="text-xl text-blue-200 max-w-3xl mx-auto">
+            Industry-relevant programs designed to get you hired in today's most in-demand fields
           </p>
         </div>
+      </div>
 
-        <div className="flex flex-wrap justify-center gap-6 px-4">
-          {[
-            {
-              title: "Independent Research",
-              desc: "Our Independent Research delivers data-driven insights and strategic analysis to support informed decision-making.",
-              button: "LEARN MORE",
-              icon: Icon5,
-            },
-            {
-              title: "Consulting",
-              desc: "Our Consulting services provide expert guidance and strategic solutions to drive business growth and success.",
-              button: "EXPLORE SOLUTIONS",
-              icon: Icon5,
-            },
-            {
-              title: "Marketing Services",
-              desc: "Our Marketing Services help businesses grow with strategic campaigns, brand positioning, and data-driven insights.",
-              button: "FIND TALENT",
-              icon: Icon6,
-            },
-          ].map((item, i) => {
-            let baseTranslate = "";
-            if (i === 0) baseTranslate = "-translate-x-12";
-            else if (i === 1) baseTranslate = "translate-y-10";
-            else if (i === 2) baseTranslate = "translate-x-12";
-
-            return (
-              <div
-                key={i}
-                className={`group bg-white border border-gray-900 rounded-[32px] p-6 shadow-sm flex flex-col justify-between max-w-sm w-full transition-all duration-700 ease-in-out transform ${
-                  isVisible
-                    ? "opacity-100 translate-x-0 translate-y-0"
-                    : `${baseTranslate} opacity-0`
-                } hover:shadow-lg hover:-translate-y-1`}
-              >
-                <div>
-                  <h5 className="text-lg font-bold mb-2 group-hover:text-blue-600">{item.title}</h5>
-                  <p className="text-gray-700 mb-6 group-hover:text-gray-900">{item.desc}</p>
-                </div>
-                <div className="flex items-center justify-between mt-auto">
-                  <a
-                    href="#"
-                    className="bg-blue-600 text-white px-4 py-3 rounded-md text-sm font-semibold transition-all duration-300 ease-in-out group-hover:bg-blue-700 group-hover:scale-105"
-                  >
-                    {item.button}
-                  </a>
-                  <img
-                    src={item.icon}
-                    alt={`${item.title} Icon`}
-                    className="w-12 h-12 object-contain transition-transform duration-300 ease-in-out group-hover:scale-110"
-                  />
+      {/* Courses Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {courses.map((course) => (
+            <div 
+              key={course.id} 
+              className="bg-white rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+            >
+              <div className="relative">
+                <img 
+                  src={course.image} 
+                  alt={course.title} 
+                  className="w-full h-56 object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+                  <h3 className="text-xl font-bold text-white">{course.title}</h3>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* WHAT WE DO */}
-      <section className="text-center mb-16">
-        <h2 className="text-4xl font-bold">WHAT WE DO</h2>
-        <p className="text-xl font-semibold text-gray-700">
-          WE HELP YOU TO ENSURE EVERYONE IS IN THE RIGHT JOBS
-        </p>
-      </section>
-
-      {/* INDEPENDENT RESEARCH SECTION */}
-      <section className="grid md:grid-cols-2 gap-10 items-center mb-20 px-4">
-        <div
-          className={`space-y-6 transform transition-all duration-1000 ease-in-out ${
-            isVisible ? "translate-x-0 opacity-100" : "translate-x-20 opacity-0"
-          }`}
-        >
-          <h2 className="text-5xl font-bold">INDEPENDENT RESEARCH</h2>
-          <p className="text-gray-700 text-base">
-            Markets dominated by products and services designed for the general consumer.
-          </p>
-          <div className="mt-6">
-            <a
-              href="#"
-              className="bg-blue-600 text-white px-6 py-3 rounded-md font-bold text-sm shadow hover:bg-blue-700 transition ease-in-out duration-300"
-            >
-              REQUEST A CUSTOM REPORT
-            </a>
-          </div>
-        </div>
-        <div className="relative w-full max-w-xl mx-auto">
-          <img
-            src={Icon7}
-            alt="Icon Overlay"
-            className={`absolute -left-10 top-10 w-24 h-24 z-20 shadow-xl transition-all duration-1000 ease-in-out transform ${
-              isVisible ? "translate-y-0 opacity-100" : "-translate-y-10 opacity-0"
-            } hover:scale-110 active:scale-95 cursor-pointer`}
-          />
-          <img src={hr1} alt="Independent Research" className="w-full shadow-md" />
-        </div>
-      </section>
-
-      {/* CONSULTING SECTION */}
-      <section
-        className="w-full bg-cover bg-center bg-no-repeat px-4 py-16"
-        style={{ backgroundImage: `url(${read})` }}
-      >
-        <div className="grid md:grid-cols-2 gap-10 items-center max-w-7xl mx-auto">
-          <div className="relative w-full max-w-xl mx-auto">
-            <img src={hr2} alt="Consulting" className="w-full shadow-md" />
-            <img
-              src={Icon7}
-              alt="Icon Overlay"
-              className={`absolute right-[-30px] top-[40px] w-24 h-24 z-20 shadow-xl transition-all duration-1000 ease-in-out transform ${
-                isVisible ? "translate-y-0 opacity-100" : "-translate-y-10 opacity-0"
-              } hover:scale-110 active:scale-95 cursor-pointer`}
-            />
-          </div>
-          <div
-            className={`space-y-4 transition-all duration-1000 ease-in-out transform ${
-              isVisible ? "translate-x-0 opacity-100" : "translate-x-10 opacity-0"
-            }`}
-          >
-            <h2 className="text-5xl font-bold">CONSULTING</h2>
-            <p className="text-gray-700 text-base">
-              Business Insurance serves business executives who are responsible for the purchase and administration.
-            </p>
-            <div
-              className={`pt-4 transition-all duration-1000 ease-in-out transform delay-150 ${
-                isVisible ? "translate-x-0 opacity-100" : "-translate-x-10 opacity-0"
-              }`}
-            >
-              <a
-                href="#"
-                className="bg-blue-600 text-white px-6 py-3 rounded-md font-bold text-sm shadow transition-all duration-300 ease-in-out hover:bg-blue-700 hover:scale-105"
-              >
-                START YOUR STRATEGIC CONSULTATION
-              </a>
+              <div className="p-6">
+                <p className="text-gray-600 mb-4">{course.description}</p>
+                <div className="flex justify-between text-sm text-gray-500 mb-6">
+                  <span>⏱️ {course.duration}</span>
+                  <span>📊 {course.level}</span>
+                </div>
+                <Link 
+                  to={`/course/${course.id}`} 
+                  className="block w-full text-center py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all"
+                >
+                  View Course Details
+                </Link>
+              </div>
             </div>
-          </div>
+          ))}
         </div>
-      </section>
-
-      {/* PRICING LINK */}
-      <div className="text-center py-10">
-        <h2 className="text-5xl font-semibold">
-          <a
-            href="#"
-            className="text-blue-600 underline hover:text-blue-700 transition-colors duration-300"
-          >
-            PRICING PLANS
-          </a>
-        </h2>
       </div>
 
-      {/* MARKETING SERVICES SECTION */}
-      <section className="grid md:grid-cols-2 gap-10 items-center my-20 px-4">
-        <div
-          className={`space-y-4 transform transition-all duration-1000 ease-in-out ${
-            isVisible ? "translate-x-0 opacity-100" : "translate-x-20 opacity-0"
-          }`}
-        >
-          <h2 className="text-5xl font-bold">MARKETING SERVICES</h2>
-          <p className="text-gray-700 text-base">
-            We go deep to unlock insight and have the courage to act. We bring the right people together to challenge.
+      {/* CTA Section */}
+      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-white mb-6">Not Sure Which Course Is Right For You?</h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            Take our 2-minute career quiz to discover the perfect program for your goals
           </p>
-          <div
-            className={`pt-4 transition-all duration-1000 ease-in-out transform delay-200 ${
-              isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-            }`}
+          <Link 
+            to="/career-quiz" 
+            className="inline-block px-8 py-4 bg-white text-blue-600 font-bold rounded-full hover:bg-gray-100 transition-all shadow-lg"
           >
-            <a
-              href="#"
-              className="bg-blue-600 text-white px-6 py-3 rounded-md font-bold text-sm shadow transition-all duration-300 ease-in-out hover:bg-blue-700 hover:scale-105"
-            >
-              FIND YOUR TALENT TODAY
-            </a>
-          </div>
+            Take Career Quiz
+          </Link>
         </div>
-        <div className="relative w-full max-w-xl mx-auto">
-          <img
-            src={icon8}
-            alt="Icon Overlay"
-            className={`absolute -left-10 top-6 w-24 h-24 z-20 shadow-xl transition-all duration-1000 ease-in-out transform ${
-              isVisible ? "translate-y-0 opacity-100" : "-translate-y-10 opacity-0"
-            } hover:scale-110 cursor-pointer`}
-          />
-          <img src={hr3} alt="Marketing Services" className="w-full shadow-md" />
-        </div>
-      </section>
-
-      {/* STATS */}
-      <div>
-        <Stats />
       </div>
-
-      {/* FOOTER CTA */}
-      <section
-        className="w-full bg-blue-800 min-h-[200px] py-20 px-4 bg-cover bg-center"
-        style={{ backgroundImage: `url(${footer})` }}
-      >
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between h-full mt-10">
-          <h2
-            className={`text-white font-bold text-5xl text-center md:text-left mb-6 md:mb-0 transition-all duration-1000 ease-in-out transform ${
-              isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-            }`}
-          >
-            WE’RE DELIVERING THE BEST <br className="hidden md:block" />
-            CUSTOMER EXPERIENCE
-          </h2>
-
-          <a
-            href="#"
-            className={`bg-white text-black font-semibold px-6 py-4 rounded shadow transition-all duration-1000 ease-in-out transform ${
-              isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-            } hover:shadow-lg hover:text-blue-800 hover:scale-105`}
-          >
-            LET'S GET STARTED
-          </a>
-        </div>
-      </section>
     </div>
   );
 };
 
-export default ServicesPage;
+export default Services;
