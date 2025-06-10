@@ -52,7 +52,8 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }) => {
           
           {/* Other NavLinks with same onClick for mobile */}
           {[
-            { to: "users", icon: <FaUsers className="mr-3" />, text: "Users" },
+            { to: "Adminstudents", icon: <FaUsers className="mr-3" />, text: "Students" },
+            { to: "adminstrainers", icon: <FaUsers className="mr-3" />, text: "Trainers" },
             { to: "courses", icon: <FaGem className="mr-3" />, text: "Courses" },
              { to: "plans", icon: <FaSymfony className="mr-3" />, text: "Plans" },
             { to: "reports", icon: <FaBell className="mr-3" />, text: "Reports" },

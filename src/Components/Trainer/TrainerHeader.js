@@ -8,7 +8,7 @@ const TrainerHeader = ({ toggleSidebar }) => {
   
   const handleLogout = () => {
     localStorage.removeItem('trainerToken');
-    navigate('/trainer-login');
+    navigate('/login');
   };
 
   return (

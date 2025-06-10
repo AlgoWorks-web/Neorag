@@ -33,7 +33,7 @@ import Settings from "./Components/UserDashboard/Settings";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
 import AdminLogin from "./Components/Admin/AdminLogin";
 import AdminHome from "./Components/Admin/AdminHome";
-import AdminUsers from "./Components/Admin/AdminUsers";
+
 import AdminCourses from "./Components/Admin/AdminCourses";
 import AdminPlans from "./Components/Admin/AdminPlans";
 import AdminSettings from "./Components/Admin/AdminSettings";
@@ -57,6 +57,9 @@ import CourseDetail from "./Components/Student/CourseDetail";
 import MaterialsList from "./Components/Student/MaterialsList";
 import VideoLectures from "./Components/Student/VideoLectures";
 import ScheduleView from "./Components/Student/ScheduleView";
+import AdminUsers from "./Components/Admin/AdminStudents";
+import AdminTrainers from "./Components/Admin/AdminTrainers";
+import AdminStudents from "./Components/Admin/AdminStudents";
 
 const AppContent = () => {
   const location = useLocation();
@@ -104,7 +107,8 @@ const AppContent = () => {
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin-home" element={<AdminDashboard />}>
           <Route index element={<AdminHome />} />
-          <Route path="users" element={<AdminUsers />} />
+          <Route path="adminstudents" element={<AdminStudents />} />
+          <Route path="adminstrainers" element={<AdminTrainers />} />
           <Route path="courses" element={<AdminCourses />} />
           <Route path="plans" element={<AdminPlans />} />
           <Route path="settings" element={<AdminSettings />} />
