@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 function AdminTrainers() {
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     trainerName: '',
     email: '',
@@ -19,11 +20,45 @@ function AdminTrainers() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Form submission logic here (e.g., API call)
-    console.log('Form Data:', formData);
-    setShowForm(false); // Close modal after submit
+    setIsSubmitting(true);
+
+    const data = new FormData();
+    data.append('trainer_name', formData.trainerName);
+    data.append('email', formData.email);
+    if (formData.profilePic) {
+      data.append('profile_pic', formData.profilePic);
+    }
+    data.append('bio', formData.bio);
+    data.append('expertise', formData.expertise);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/admin/trainer/trainers', {
+        method: 'POST',
+        body: data,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert('Trainer onboarded successfully.');
+        setFormData({
+          trainerName: '',
+          email: '',
+          profilePic: null,
+          bio: '',
+          expertise: '',
+        });
+        setShowForm(false);
+      } else {
+        alert(result.message || 'Something went wrong.');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('Error submitting the form.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -44,7 +79,7 @@ function AdminTrainers() {
           <div className="bg-white p-6 rounded-lg w-full max-w-md relative">
             <button
               onClick={() => setShowForm(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-black"
+              className="absolute top-2 right-2 text-gray-500 hover:text-black text-2xl"
             >
               ×
             </button>
@@ -98,19 +133,48 @@ function AdminTrainers() {
               <div>
                 <label className="block text-sm font-medium">Expertise</label>
                 <textarea
-                  type="text"
                   name="expertise"
                   value={formData.expertise}
                   onChange={handleChange}
+                  required
                   className="w-full border rounded px-3 py-2 mt-1"
                 ></textarea>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                disabled={isSubmitting}
+                className={`w-full text-white py-2 rounded flex justify-center items-center ${
+                  isSubmitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                Submit
+                {isSubmitting ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8z"
+                      ></path>
+                    </svg>
+                    Submitting...
+                  </div>
+                ) : (
+                  'Submit'
+                )}
               </button>
             </form>
           </div>
