@@ -1,4 +1,4 @@
-// src/components/Trainer/TrainingInfo.js
+ // src/components/Trainer/TrainingInfo.js
 import React, { useState } from 'react';
 
 const TrainingInfo = () => {

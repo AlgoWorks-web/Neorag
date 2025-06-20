@@ -1,20 +1,17 @@
-// src/components/Trainer/TrainerProfile.js
 import React, { useState } from 'react';
 import FileUpload from '../Common/FileUpload';
 
 const TrainerProfile = () => {
-  const [profile, setProfile] = useState({
-    name: 'John Trainer',
-    email: 'john.trainer@example.com',
-    bio: 'Senior Trainer with 10+ years of experience in web development technologies. Specialized in React, Node.js, and JavaScript.',
-    phone: '+1 (555) 123-4567',
-    location: 'San Francisco, CA',
-    expertise: ['React', 'JavaScript', 'Node.js', 'Express', 'MongoDB']
+  const [formData, setFormData] = useState({
+    trainer_name: '',
+    email: '',
+    bio: '',
+    location: '',
+    phone_number: '',
+    expertise: '',
   });
-  
   const [avatar, setAvatar] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ ...profile });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,9 +24,7 @@ const TrainerProfile = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setProfile(formData);
     setIsEditing(false);
-    // In a real app, this would save to the server
   };
 
   return (
@@ -66,18 +61,17 @@ const TrainerProfile = () => {
             <div className="md:col-span-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-gray-700 text-sm font-medium mb-1">Full Name</label>
+                  <label htmlFor="trainer_name" className="block text-gray-700 text-sm font-medium mb-1">Full Name</label>
                   <input
                     type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
+                    id="trainer_name"
+                    name="trainer_name"
+                    value={formData.trainer_name}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2"
                     required
                   />
                 </div>
-                
                 <div>
                   <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-1">Email</label>
                   <input
@@ -85,25 +79,21 @@ const TrainerProfile = () => {
                     id="email"
                     name="email"
                     value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required
                     disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
                   />
                 </div>
-                
                 <div>
-                  <label htmlFor="phone" className="block text-gray-700 text-sm font-medium mb-1">Phone</label>
+                  <label htmlFor="phone_number" className="block text-gray-700 text-sm font-medium mb-1">Phone</label>
                   <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
+                    type="text"
+                    id="phone_number"
+                    name="phone_number"
+                    value={formData.phone_number}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2"
                   />
                 </div>
-                
                 <div>
                   <label htmlFor="location" className="block text-gray-700 text-sm font-medium mb-1">Location</label>
                   <input
@@ -112,10 +102,20 @@ const TrainerProfile = () => {
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2"
                   />
                 </div>
-                
+                <div className="md:col-span-2">
+                  <label htmlFor="expertise" className="block text-gray-700 text-sm font-medium mb-1">Expertise</label>
+                  <input
+                    type="text"
+                    id="expertise"
+                    name="expertise"
+                    value={formData.expertise}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2"
+                  />
+                </div>
                 <div className="md:col-span-2">
                   <label htmlFor="bio" className="block text-gray-700 text-sm font-medium mb-1">Bio</label>
                   <textarea
@@ -124,18 +124,14 @@ const TrainerProfile = () => {
                     value={formData.bio}
                     onChange={handleChange}
                     rows="4"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2"
                   ></textarea>
                 </div>
               </div>
-              
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setFormData(profile);
-                  }}
+                  onClick={() => setIsEditing(false)}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
                 >
                   Cancel
@@ -153,40 +149,31 @@ const TrainerProfile = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1 flex flex-col items-center">
-            <div className="bg-gray-200 border-2 border-dashed rounded-xl w-48 h-48 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-800">{profile.name}</h2>
-            <p className="text-gray-600">{profile.email}</p>
+            <img
+              src={avatar ? URL.createObjectURL(avatar) : '/default-avatar.png'}
+              alt=""
+              className="w-48 h-48 object-cover rounded-full border-2 border-gray-300 mb-4"
+            />
+            <h2 className="text-xl font-semibold text-gray-800">{formData.trainer_name || 'N/A'}</h2>
+            <p className="text-gray-600">{formData.email || 'N/A'}</p>
           </div>
-          
           <div className="md:col-span-2">
             <div className="mb-6">
               <h3 className="text-lg font-medium text-gray-900 mb-2">About</h3>
-              <p className="text-gray-700">{profile.bio}</p>
+              <p className="text-gray-700">{formData.bio || 'No bio available'}</p>
             </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Phone</h4>
-                <p className="text-gray-900">{profile.phone}</p>
+                <p className="text-gray-900">{formData.phone_number || 'N/A'}</p>
               </div>
-              
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Location</h4>
-                <p className="text-gray-900">{profile.location}</p>
+                <p className="text-gray-900">{formData.location || 'N/A'}</p>
               </div>
-              
               <div className="md:col-span-2">
-                <h4 className="text-sm font-medium text-gray-500">Areas of Expertise</h4>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {profile.expertise.map((skill, index) => (
-                    <span 
-                      key={index}
-                      className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+                <h4 className="text-sm font-medium text-gray-500">Expertise</h4>
+                <p className="text-gray-900">{formData.expertise || 'N/A'}</p>
               </div>
             </div>
           </div>

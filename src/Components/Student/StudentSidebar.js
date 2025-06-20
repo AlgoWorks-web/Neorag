@@ -34,9 +34,22 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
           <FaHome className="text-lg" />
           <span>Dashboard</span>
         </NavLink>
+
+        <NavLink 
+          to="courses" 
+          className={({isActive}) => 
+            `flex items-center space-x-3 py-3 px-4 rounded-lg transition duration-200 ${
+              isActive ? 'bg-indigo-700 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-700'
+            }`
+          }
+          onClick={toggleSidebar}
+        >
+          <FaBook className="text-lg" />
+          <span>Courses</span>
+        </NavLink>
         
         <NavLink 
-          to="/student/courses" 
+          to="mycourses" 
           className={({isActive}) => 
             `flex items-center space-x-3 py-3 px-4 rounded-lg transition duration-200 ${
               isActive ? 'bg-indigo-700 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-700'
@@ -47,6 +60,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
           <FaBook className="text-lg" />
           <span>My Courses</span>
         </NavLink>
+
         
         <NavLink 
           to="/student/materials" 
@@ -88,7 +102,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
         </NavLink>
         
         <NavLink 
-          to="/student/profile" 
+          to="studentprofile" 
           className={({isActive}) => 
             `flex items-center space-x-3 py-3 px-4 rounded-lg transition duration-200 ${
               isActive ? 'bg-indigo-700 text-white shadow-md' : 'text-indigo-200 hover:bg-indigo-700'

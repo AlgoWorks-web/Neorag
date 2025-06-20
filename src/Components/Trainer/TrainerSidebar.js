@@ -41,6 +41,20 @@ const TrainerSidebar = ({ sidebarOpen, toggleSidebar }) => {
           <FaBook />
           <span>Training Info</span>
         </NavLink>
+
+
+        <NavLink 
+          to="uploadCourses" 
+          className={({isActive}) => 
+            `flex items-center space-x-2 py-2 px-4 rounded transition duration-200 ${
+              isActive ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+            }`
+          }
+          onClick={toggleSidebar}
+        >
+          <FaBook />
+          <span>Upload New Courses</span>
+        </NavLink>
         
         <NavLink 
           to="/trainer/materials" 

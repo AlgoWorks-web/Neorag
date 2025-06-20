@@ -9,6 +9,8 @@ function AdminTrainers() {
     profilePic: null,
     bio: '',
     expertise: '',
+    location: '',
+    phone_number: '',
   });
 
   const handleChange = (e) => {
@@ -32,6 +34,8 @@ function AdminTrainers() {
     }
     data.append('bio', formData.bio);
     data.append('expertise', formData.expertise);
+    data.append('location', formData.location);
+    data.append('phone_number', formData.phone_number);
 
     try {
       const response = await fetch('http://localhost:8000/api/admin/trainer/trainers', {
@@ -48,6 +52,8 @@ function AdminTrainers() {
           profilePic: null,
           bio: '',
           expertise: '',
+          location: '',
+          phone_number: '',
         });
         setShowForm(false);
       } else {
@@ -139,6 +145,28 @@ function AdminTrainers() {
                   required
                   className="w-full border rounded px-3 py-2 mt-1"
                 ></textarea>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 mt-1"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium">Phone Number</label>
+                <input
+                  type="text"
+                  name="phone_number"
+                  value={formData.phone_number}
+                  onChange={handleChange}
+                  className="w-full border rounded px-3 py-2 mt-1"
+                />
               </div>
 
               <button

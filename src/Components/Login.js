@@ -5,7 +5,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [role, setRole] = useState("student"); // Toggle between 'student' and 'trainer'
+  const [role, setRole] = useState("student");
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +20,7 @@ const Login = () => {
   const handleResendVerification = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("http://127.0.0.1:8000/api/resend-verification", {
+      const response = await axios.post("https://localhost:8000/api/student/resend-verification", {
         email: formData.email,
       });
 
@@ -39,68 +39,76 @@ const Login = () => {
     }
   };
 
-   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setMessage("");
-  setIsSuccess(null);
-  setShowResendButton(false);
-  setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setIsSuccess(null);
+    setShowResendButton(false);
+    setLoading(true);
 
-  try {
-    const endpoint =
-      role === "student"
-        ? "http://localhost:8000/api/student/login"
-        : "http://localhost:8000/api/admin/trainer/login";
+    try {
+      const endpoint =
+        role === "student"
+          ? "http://localhost:8000/api/student/login"
+          : "http://localhost:8000/api/admin/trainer/login";
 
-    const payload =
-      role === "student"
-        ? {
-            email: formData.email,
-            password: formData.password,
-          }
-        : {
-            email_id: formData.email, // ✅ corrected here
-            password: formData.password,
-          };
+      const payload =
+        role === "student"
+          ? {
+              email: formData.email,
+              password: formData.password,
+            }
+          : {
+              email_id: formData.email,
+              password: formData.password,
+            };
 
-    const response = await axios.post(endpoint, payload);
+      const response = await axios.post(endpoint, payload);
 
-    if (response.data.success) {
-      localStorage.setItem(
-        role === "student" ? "studentUser" : "trainerUser",
-        JSON.stringify(response.data.user)
-      );
-      setMessage("Login successful!");
-      setIsSuccess(true);
-      navigate(role === "student" ? "/student" : "/trainer");
-    } else {
-      setMessage("Login failed. Invalid credentials.");
-      setIsSuccess(false);
-    }
-  } catch (error) {
-    if (error.response) {
-      const { status, data } = error.response;
+      if (response.data.success) {
+        console.log("=== LOGIN RESPONSE ===", response.data);
+        console.log("=== USER DATA ===", response.data.user);
 
-      if (status === 403 && data.message.includes("verify")) {
-        setMessage("⚠️ Please verify your email before logging in.");
-        setIsSuccess(false);
-        setShowResendButton(true);
-      } else if (status === 401 || status === 422) {
-        setMessage("❌ Login failed. Invalid email or password.");
-        setIsSuccess(false);
+        // Now the backend returns complete trainer data including trainer_id
+        localStorage.setItem(
+          role === "student" ? "studentUser" : "trainerUser",
+          JSON.stringify(response.data.user)
+        );
+
+        // Debug: Verify what was saved
+        const savedData = localStorage.getItem(role === "student" ? "studentUser" : "trainerUser");
+        console.log("=== SAVED TO LOCALSTORAGE ===", JSON.parse(savedData));
+
+        setMessage("Login successful!");
+        setIsSuccess(true);
+        navigate(role === "student" ? "/student" : "/trainer");
       } else {
-        setMessage(data.message || "An error occurred. Please try again later.");
+        setMessage("Login failed. Invalid credentials.");
         setIsSuccess(false);
       }
-    } else {
-      setMessage("Network error. Please check your internet connection.");
-      setIsSuccess(false);
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+    } catch (error) {
+      if (error.response) {
+        const { status, data } = error.response;
 
+        if (status === 403 && data.message.includes("verify")) {
+          setMessage("⚠️ Please verify your email before logging in.");
+          setIsSuccess(false);
+          setShowResendButton(true);
+        } else if (status === 401 || status === 422) {
+          setMessage("❌ Login failed. Invalid email or password.");
+          setIsSuccess(false);
+        } else {
+          setMessage(data.message || "An error occurred. Please try again later.");
+          setIsSuccess(false);
+        }
+      } else {
+        setMessage("Network error. Please check your internet connection.");
+        setIsSuccess(false);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">

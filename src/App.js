@@ -23,10 +23,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // User Dashboard components
-import UserDashboard from "./Components/UserDashboard/UserDashboard";
-import Myhome from "./Components/UserDashboard/Myhome";
-import Courses from "./Components/UserDashboard/Courses";
-import MyCourses from "./Components/UserDashboard/MyCourses";
+
 import Settings from "./Components/UserDashboard/Settings";
 
 // Admin components
@@ -52,7 +49,7 @@ import VideoUploader from "./Components/Trainer/VideoUploader"; // Updated path
 import StudentDashboard from "./pages/StudentDashboard";
 import StudentLogin from "./pages/StudentLogin";
 import StudentHome from "./Components/Student/StudentHome";
-import StudentCourses from "./Components/Student/StudentCourses";
+
 import CourseDetail from "./Components/Student/CourseDetail";
 import MaterialsList from "./Components/Student/MaterialsList";
 import VideoLectures from "./Components/Student/VideoLectures";
@@ -60,6 +57,10 @@ import ScheduleView from "./Components/Student/ScheduleView";
 import AdminUsers from "./Components/Admin/AdminStudents";
 import AdminTrainers from "./Components/Admin/AdminTrainers";
 import AdminStudents from "./Components/Admin/AdminStudents";
+import StudentProfile from "./Components/Student/StudentProfile";
+import UploadNewCourses from "./Components/Trainer/UploadNewCourses";
+import Courses from "./Components/Student/Courses";
+import StudentMyCourses from "./Components/Student/StudentMyCourses";
 
 const AppContent = () => {
   const location = useLocation();
@@ -95,13 +96,13 @@ const AppContent = () => {
         <Route path="/book-appointment" element={<AppointmentForm />} />
 
         {/* User Dashboard Routes */}
-        <Route path="/user-dashboard" element={<UserDashboard />}>
+        {/* <Route path="/user-dashboard" element={<UserDashboard />}>
           <Route path="home" element={<Myhome />} />
           <Route path="courses" element={<Courses />} />
           <Route path="mycourse" element={<MyCourses />} />
           <Route path="pricing" element={<Pricing minimal={true} />} />
           <Route path="Settings" element={<Settings />} />
-        </Route>
+        </Route> */}
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLogin />} />
@@ -109,7 +110,7 @@ const AppContent = () => {
           <Route index element={<AdminHome />} />
           <Route path="adminstudents" element={<AdminStudents />} />
           <Route path="adminstrainers" element={<AdminTrainers />} />
-          <Route path="courses" element={<AdminCourses />} />
+          <Route path="Admincourses" element={<AdminCourses />} />
           <Route path="plans" element={<AdminPlans />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="reports" element={<AdminReports />} />
@@ -120,22 +121,25 @@ const AppContent = () => {
         <Route path="/trainer" element={<TrainerDashboard />}>
           <Route index element={<TrainerHome />} />
           <Route path="training-info" element={<TrainingInfo />} />
+           <Route path="uploadCourses" element={<UploadNewCourses />} />
           <Route path="materials" element={<TrainingMaterials />} />
           <Route path="videos" element={<VideoUploader />} />
           <Route path="profile" element={<TrainerProfile />} />
           <Route path="settings" element={<Settings />} /> {/* Use existing Settings component */}
         </Route>
-        
+
 
         {/* Student Routes */}
         <Route path="/student-login" element={<StudentLogin />} />
         <Route path="/student" element={<StudentDashboard />}>
           <Route index element={<StudentHome />} />
-          <Route path="courses" element={<StudentCourses />} />
+          <Route path="courses" element={<Courses/>} />
+          <Route path="mycourses" element={<StudentMyCourses />} />
           <Route path="course/:courseId" element={<CourseDetail />} />
           <Route path="materials" element={<MaterialsList />} />
           <Route path="videos" element={<VideoLectures />} />
           <Route path="schedule" element={<ScheduleView />} />
+          <Route path="studentprofile" element={<StudentProfile />} />
         </Route>
 
       </Routes>
