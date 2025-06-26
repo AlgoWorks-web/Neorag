@@ -12,7 +12,8 @@ const StudentHeader = ({ toggleSidebar }) => {
     const studentUser = JSON.parse(localStorage.getItem('studentUser'));
     if (studentUser && studentUser.id) {
       axios
-        .get(`http://localhost:8000/api/student/${studentUser.id}`)
+        // .get(`http://localhost:8000/api/student/${studentUser.id}`)
+        .get(`http://hydersoft.com/api/student/${studentUser.id}`)
         .then(res => {
           setUsername(res.data.username);
         })

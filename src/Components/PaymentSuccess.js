@@ -18,7 +18,7 @@ function PaymentSuccess() {
 
   const handlePaymentSuccess = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/payments/success?session_id=${sessionId}`);
+      const response = await fetch(`https://hydersoft.com/api/payments/success?session_id=${sessionId}`);
       const data = await response.json();
 
       if (response.ok) {

@@ -27,8 +27,8 @@ const Signup = () => {
     setLoading(true); // Start loading
 
     try {
-      // const response = await axios.post("https://hydersoft.com/api/register", formData);
-      const response = await axios.post("http://localhost:8000/api/register", formData);
+      const response = await axios.post("https://hydersoft.com/api/student/register", formData);
+      // const response = await axios.post("http://localhost:8000/api/student/register", formData);
       setMessage("🎉 Registration successful! check your mail and  You can now log in.");
       setIsSuccess(true);
       setFormData({ username: "", email: "", password: "" });
@@ -62,9 +62,8 @@ const Signup = () => {
 
         {message && (
           <div
-            className={`p-3 mb-4 text-sm rounded text-center font-medium ${
-              isSuccess ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-            }`}
+            className={`p-3 mb-4 text-sm rounded text-center font-medium ${isSuccess ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+              }`}
           >
             {message}
           </div>

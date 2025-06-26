@@ -49,19 +49,21 @@ const Login = () => {
     try {
       const endpoint =
         role === "student"
-          ? "http://localhost:8000/api/student/login"
-          : "http://localhost:8000/api/admin/trainer/login";
+          // ? "http://localhost:8000/api/student/login"
+          // : "http://localhost:8000/api/admin/trainer/login";
+          ? "http://hydersoft.com/api/student/login"
+          : "http://hydersoft.com/api/admin/trainer/login";
 
       const payload =
         role === "student"
           ? {
-              email: formData.email,
-              password: formData.password,
-            }
+            email: formData.email,
+            password: formData.password,
+          }
           : {
-              email_id: formData.email,
-              password: formData.password,
-            };
+            email_id: formData.email,
+            password: formData.password,
+          };
 
       const response = await axios.post(endpoint, payload);
 
@@ -119,17 +121,15 @@ const Login = () => {
         <div className="flex justify-center mb-6">
           <button
             onClick={() => setRole("student")}
-            className={`px-4 py-2 rounded-l ${
-              role === "student" ? "bg-blue-600 text-white" : "bg-gray-200"
-            }`}
+            className={`px-4 py-2 rounded-l ${role === "student" ? "bg-blue-600 text-white" : "bg-gray-200"
+              }`}
           >
             Student
           </button>
           <button
             onClick={() => setRole("trainer")}
-            className={`px-4 py-2 rounded-r ${
-              role === "trainer" ? "bg-blue-600 text-white" : "bg-gray-200"
-            }`}
+            className={`px-4 py-2 rounded-r ${role === "trainer" ? "bg-blue-600 text-white" : "bg-gray-200"
+              }`}
           >
             Trainer
           </button>

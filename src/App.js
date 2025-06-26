@@ -58,16 +58,19 @@ import AdminUsers from "./Components/Admin/AdminStudents";
 import AdminTrainers from "./Components/Admin/AdminTrainers";
 import AdminStudents from "./Components/Admin/AdminStudents";
 import StudentProfile from "./Components/Student/StudentProfile";
-import UploadNewCourses from "./Components/Trainer/UploadNewCourses";
 import Courses from "./Components/Student/Courses";
 import StudentMyCourses from "./Components/Student/StudentMyCourses";
+import PaymentSuccess from "./Components/PaymentSuccess";
+
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavAndFooter = location.pathname.startsWith("/user-dashboard") ||
+  const hideNavAndFooter =
+    location.pathname.startsWith("/user-dashboard") ||
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/trainer") ||
-    location.pathname.startsWith("/student");
+    location.pathname.startsWith("/student") ||
+    ["/login", "/signup", "/forgot-password"].includes(location.pathname);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -121,7 +124,7 @@ const AppContent = () => {
         <Route path="/trainer" element={<TrainerDashboard />}>
           <Route index element={<TrainerHome />} />
           <Route path="training-info" element={<TrainingInfo />} />
-           <Route path="uploadCourses" element={<UploadNewCourses />} />
+          {/* <Route path="uploadCourses" element={<UploadNewCourses />} /> */}
           <Route path="materials" element={<TrainingMaterials />} />
           <Route path="videos" element={<VideoUploader />} />
           <Route path="profile" element={<TrainerProfile />} />
@@ -133,14 +136,17 @@ const AppContent = () => {
         <Route path="/student-login" element={<StudentLogin />} />
         <Route path="/student" element={<StudentDashboard />}>
           <Route index element={<StudentHome />} />
-          <Route path="courses" element={<Courses/>} />
+          <Route path="courses" element={<Courses />} />
           <Route path="mycourses" element={<StudentMyCourses />} />
           <Route path="course/:courseId" element={<CourseDetail />} />
           <Route path="materials" element={<MaterialsList />} />
           <Route path="videos" element={<VideoLectures />} />
           <Route path="schedule" element={<ScheduleView />} />
           <Route path="studentprofile" element={<StudentProfile />} />
+         
+       
         </Route>
+         <Route path="/payment/success" element={<PaymentSuccess />} />
 
       </Routes>
 
@@ -158,6 +164,7 @@ function App() {
     <Router>
       <AppContent />
       <ToastContainer position="top-center" autoClose={3000} />
+      
     </Router>
   );
 }
