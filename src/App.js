@@ -61,6 +61,7 @@ import StudentProfile from "./Components/Student/StudentProfile";
 import Courses from "./Components/Student/Courses";
 import StudentMyCourses from "./Components/Student/StudentMyCourses";
 import PaymentSuccess from "./Components/PaymentSuccess";
+import PricingPlans from "./Components/PricingPlans";
 
 
 const AppContent = () => {
@@ -97,7 +98,7 @@ const AppContent = () => {
         <Route path="/useragreement" element={<Useragreement />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/book-appointment" element={<AppointmentForm />} />
-
+        <Route path="/pricingplans" element={<PricingPlans/>}/>
         {/* User Dashboard Routes */}
         {/* <Route path="/user-dashboard" element={<UserDashboard />}>
           <Route path="home" element={<Myhome />} />
