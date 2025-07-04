@@ -6,17 +6,16 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }) => {
     <>
       {/* Overlay for mobile */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
           onClick={toggleSidebar}
         />
       )}
-      
+
       {/* Sidebar */}
-      <aside 
-        className={`bg-white w-60 md:w-60 fixed h-full z-30 transition-all duration-300 ease-in-out ${
-          sidebarOpen ? 'left-0' : '-left-64 md:left-0'
-        }`}
+      <aside
+        className={`bg-white w-60 md:w-60 fixed h-full z-30 transition-all duration-300 ease-in-out ${sidebarOpen ? 'left-0' : '-left-64 md:left-0'
+          }`}
       >
         <div className="p-4 border-b">
           <div className="flex items-center">
@@ -26,43 +25,44 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="p-4">
           <h5 className="font-bold text-lg">Dashboard</h5>
         </div>
-        
+
         <nav className="mb-4">
-          <button 
+          <button
             className="md:hidden w-full flex items-center p-4 bg-gray-700 text-white hover:bg-black"
             onClick={toggleSidebar}
           >
             <FaTimes className="mr-2" /> Close Menu
           </button>
-          
-          <NavLink 
-            to="/admin-home" 
+
+          <NavLink
+            to="/admin-home"
             end
-            className={({ isActive }) => 
+            className={({ isActive }) =>
               `flex items-center p-4 ${isActive ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`
             }
             onClick={() => window.innerWidth < 768 && toggleSidebar()}
           >
             <FaUsers className="mr-3" /> Overview
           </NavLink>
-          
+
           {/* Other NavLinks with same onClick for mobile */}
           {[
             { to: "Adminstudents", icon: <FaUsers className="mr-3" />, text: "Students" },
             { to: "adminstrainers", icon: <FaUsers className="mr-3" />, text: "Trainers" },
             { to: "Admincourses", icon: <FaGem className="mr-3" />, text: "Courses" },
-             { to: "plans", icon: <FaSymfony className="mr-3" />, text: "Plans" },
+            { to: "students-enrolled", icon: <FaUsers className='mr-3' />, text: "EnrolledStudents" },
+            { to: "plans", icon: <FaSymfony className="mr-3" />, text: "Plans" },
             { to: "reports", icon: <FaBell className="mr-3" />, text: "Reports" },
             { to: "settings", icon: <FaCog className="mr-3" />, text: "Settings" }
           ].map((item) => (
-            <NavLink 
+            <NavLink
               key={item.to}
               to={`/admin-home/${item.to}`}
-              className={({ isActive }) => 
+              className={({ isActive }) =>
                 `flex items-center p-4 ${isActive ? 'bg-blue-500 text-white' : 'hover:bg-gray-200'}`
               }
               onClick={() => window.innerWidth < 768 && toggleSidebar()}

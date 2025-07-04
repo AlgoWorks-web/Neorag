@@ -17,7 +17,7 @@ import AppointmentForm from './Components/AppointmentForm';
 import Termstouse from './Components/Termstouse';
 import Sla from './Components/Sla';
 import PrivacyPolicy from './Components/Privacypolicy';
-import Useragreement from "./Components/UserDashboard/Useragreement";
+import Useragreement from "./Components/Student/Useragreement";
 import ForgotPassword from "./Components/ForgotPassword";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -62,6 +62,8 @@ import Courses from "./Components/Student/Courses";
 import StudentMyCourses from "./Components/Student/StudentMyCourses";
 import PaymentSuccess from "./Components/PaymentSuccess";
 import PricingPlans from "./Components/PricingPlans";
+import AllCoursestogether from "./Components/Student/AllCoursestogether";
+import EnrolledStudents from "./Components/Admin/EnrolledStudents";
 
 
 const AppContent = () => {
@@ -95,10 +97,11 @@ const AppContent = () => {
         <Route path="/terms" element={<Termstouse />} />
         <Route path="/sla" element={<Sla />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/useragreement" element={<Useragreement />} />
+        
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/book-appointment" element={<AppointmentForm />} />
         <Route path="/pricingplans" element={<PricingPlans/>}/>
+        <Route path="/Allcourses" element={<AllCoursestogether/>}/>   
         {/* User Dashboard Routes */}
         {/* <Route path="/user-dashboard" element={<UserDashboard />}>
           <Route path="home" element={<Myhome />} />
@@ -118,6 +121,7 @@ const AppContent = () => {
           <Route path="plans" element={<AdminPlans />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="reports" element={<AdminReports />} />
+          <Route path="students-enrolled" element={<EnrolledStudents/>}/>
         </Route>
 
         {/* Trainer Routes - Updated to match your component structure */}
@@ -137,17 +141,18 @@ const AppContent = () => {
         <Route path="/student-login" element={<StudentLogin />} />
         <Route path="/student" element={<StudentDashboard />}>
           <Route index element={<StudentHome />} />
-          <Route path="courses" element={<Courses />} />
+          <Route path="courses" element={<PricingPlans />} />
           <Route path="mycourses" element={<StudentMyCourses />} />
-          <Route path="course/:courseId" element={<CourseDetail />} />
           <Route path="materials" element={<MaterialsList />} />
           <Route path="videos" element={<VideoLectures />} />
           <Route path="schedule" element={<ScheduleView />} />
           <Route path="studentprofile" element={<StudentProfile />} />
-         
+          <Route path="course-details/:courseId" element={<CourseDetail />} />
+          <Route path="useragreement/:courseId" element={<Useragreement />} />
+                
        
         </Route>
-         <Route path="/payment/success" element={<PaymentSuccess />} />
+         <Route path="/payment-success" element={<PaymentSuccess />} />
 
       </Routes>
 

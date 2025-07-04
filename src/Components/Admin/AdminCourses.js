@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaChevronDown, FaChevronUp, FaSearch, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AdminCourses() {
   const [showForm, setShowForm] = useState(false);
@@ -13,29 +15,32 @@ function AdminCourses() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(10);
   const [totalCourses, setTotalCourses] = useState(0);
-
+  const [editingCourseId, setEditingCourseId] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    detailed_description: '',
     bio: '',
     price: '',
     thumbnail: null,
+    course_overview: '',
+    what_you_learn: '',
+    requirements: '',
+    duration: '',
+    level: 'beginner',
+    course_highlights: '',
+    course_content: [{ title: '', lessons: [''] }]
   });
 
-  // Fetch trainer list and courses on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch trainers
         const trainersResponse = await fetch('https://hydersoft.com/api/admin/trainer/trainers', {
-          headers: {
-            Accept: 'application/json',
-          },
+          headers: { Accept: 'application/json' },
         });
         const trainersData = await trainersResponse.json();
         setTrainers(trainersData);
 
-        // Fetch courses
         const coursesResponse = await fetch('https://hydersoft.com/api/courses/getcourse');
         const coursesData = await coursesResponse.json();
         setCourses(coursesData);
@@ -47,33 +52,71 @@ function AdminCourses() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  // Filter courses based on search term
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     course.trainer.trainer_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Pagination
   const paginatedCourses = filteredCourses.slice(
     (currentPage - 1) * perPage,
     currentPage * perPage
   );
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
+  // Fixed: This function should populate the form with course data for editing
+  const handleEdit = (course) => {
+    setEditingCourseId(course.course_id);
+    setFormData({
+      title: course.title || '',
+      description: course.description || '',
+      detailed_description: course.detailed_description || '',
+      bio: course.bio || '',
+      price: course.price || '',
+      thumbnail: null, // Don't set existing file
+      course_overview: course.course_overview || '',
+      what_you_learn: course.what_you_learn || '',
+      requirements: course.requirements || '',
+      duration: course.duration || '',
+      level: course.level || 'beginner',
+      course_highlights: course.course_highlights || '',
+      course_content: course.course_content || [{ title: '', lessons: [''] }]
+    });
+    setTrainerId(course.trainer?.trainer_id || '');
+    setShowForm(true);
+  };
+
+  const handleDelete = async (courseId) => {
+    if (!window.confirm('Are you sure you want to delete this course?')) return;
+
+    try {
+      const res = await fetch(`https://hydersoft.com/api/courses/${courseId}`, {
+        method: 'DELETE',
+      });
+
+      if (res.ok) {
+        toast.success('✅ Course deleted successfully.');
+        const updatedCourses = courses.filter((c) => c.course_id !== courseId);
+        setCourses(updatedCourses);
+        setTotalCourses(updatedCourses.length);
+      } else {
+        const error = await res.json();
+        toast.error(error.message || 'Failed to delete course');
+      }
+    } catch (error) {
+      console.error('Delete failed:', error);
+      toast.error('Something went wrong while deleting.');
+    }
   };
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
-    if (type === 'file') {
-      setFormData({ ...formData, [name]: files[0] });
+    const { name, value, files } = e.target;
+    if (name === 'thumbnail') {
+      setFormData(prev => ({ ...prev, [name]: files[0] }));
     } else {
-      setFormData({ ...formData, [name]: value });
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
@@ -81,353 +124,190 @@ function AdminCourses() {
     e.preventDefault();
 
     if (!trainerId) {
-      alert('Please select a trainer.');
+      toast.warning('Please select a trainer.');
       return;
     }
 
     setIsSubmitting(true);
     const data = new FormData();
-    data.append('title', formData.title);
-    data.append('description', formData.description);
-    data.append('bio', formData.bio);
-    data.append('price', formData.price);
-    data.append('trainer_id', trainerId);
+    Object.entries(formData).forEach(([key, value]) => {
+      if (key === 'course_content') {
+        data.append(key, JSON.stringify(value));
+      } else if (key === 'thumbnail' && value) {
+        data.append(key, value);
+      } else if (key !== 'thumbnail') {
+        data.append(key, value);
+      }
+    });
+    data.append('trainer_id', parseInt(trainerId, 10));
     data.append('is_active', '1');
-    if (formData.thumbnail) {
-      data.append('thumbnail', formData.thumbnail);
+
+    let url = 'https://hydersoft.com/api/courses/uploadcourse';
+    let method = 'POST';
+
+    if (editingCourseId) {
+      data.append('_method', 'PUT');  // Laravel requires this override when using FormData
+      url = `https://hydersoft.com/api/courses/${editingCourseId}`;
     }
 
     try {
-      const response = await fetch('https://hydersoft.com/api/courses/uploadcourse', {
-        method: 'POST',
+      const response = await fetch(url, {
+        method,
         body: data,
-        headers: {
-          Accept: 'application/json',
-        },
+        headers: { Accept: 'application/json' },
       });
 
       const contentType = response.headers.get('content-type');
       if (!response.ok) {
         if (contentType && contentType.includes('application/json')) {
           const error = await response.json();
-          console.error('Server error response:', error);
-          alert(error.message || 'Upload failed');
+          toast.error(error.message || 'Upload failed');
         } else {
           const errorText = await response.text();
-          console.error('Non-JSON response:', errorText);
-          alert('Server returned an unexpected response.');
+          toast.error('Server returned an unexpected response.');
         }
         return;
       }
 
-      const result = await response.json();
-      console.log('Success response:', result);
+      await response.json();
 
-      // Refresh the courses list
       const coursesResponse = await fetch('https://hydersoft.com/api/courses/getcourse');
       const coursesData = await coursesResponse.json();
       setCourses(coursesData);
       setTotalCourses(coursesData.length);
 
-      alert('✅ Course uploaded successfully!');
+      toast.success(editingCourseId ? '✅ Course updated successfully!' : '✅ Course uploaded successfully!');
       setShowForm(false);
+      setEditingCourseId(null);
       setFormData({
         title: '',
         description: '',
+        detailed_description: '',
         bio: '',
         price: '',
         thumbnail: null,
+        course_overview: '',
+        what_you_learn: '',
+        requirements: '',
+        duration: '',
+        level: 'beginner',
+        course_highlights: '',
+        course_content: [{ title: '', lessons: [''] }]
       });
       setTrainerId('');
     } catch (err) {
       console.error('Upload error:', err);
-      alert('Something went wrong.');
+      toast.error('Something went wrong.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="p-4 flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  // Function to reset form when adding new course
+  const handleAddNew = () => {
+    setEditingCourseId(null);
+    setFormData({
+      title: '',
+      description: '',
+      detailed_description: '',
+      bio: '',
+      price: '',
+      thumbnail: null,
+      course_overview: '',
+      what_you_learn: '',
+      requirements: '',
+      duration: '',
+      level: 'beginner',
+      course_highlights: '',
+      course_content: [{ title: '', lessons: [''] }]
+    });
+    setTrainerId('');
+    setShowForm(true);
+  };
 
-  if (error) {
-    return (
-      <div className="p-4 bg-red-100 text-red-700 rounded">
-        Error: {error}
-      </div>
-    );
-  }
+  if (loading) return <div className="p-4">Loading...</div>;
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   return (
     <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">COURSE MANAGEMENT</h2>
-        <div className="flex space-x-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search courses..."
-              className="pl-10 pr-4 py-2 border rounded-lg"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <FaSearch className="absolute left-3 top-3 text-gray-400" />
-          </div>
-          <button
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center"
-            onClick={() => setShowForm(true)}
-          >
-            <FaPlus className="mr-2" /> Upload Course
-          </button>
-        </div>
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop closeOnClick />
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Courses</h2>
+        <button onClick={handleAddNew} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+          <FaPlus /> Add Course
+        </button>
       </div>
 
-      {/* Courses Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trainer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created On</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedCourses.map((course) => (
-                <tr key={course.course_id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{course.course_id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{course.title}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">{course.description}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {course.trainer?.trainer_name || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${course.price}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(course.created_on).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${course.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                      {course.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-4">
-                      <FaEdit />
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200">
-          <div className="flex-1 flex justify-between sm:hidden">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage * perPage >= totalCourses}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Next
-            </button>
-          </div>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{(currentPage - 1) * perPage + 1}</span> to{' '}
-                <span className="font-medium">{Math.min(currentPage * perPage, totalCourses)}</span> of{' '}
-                <span className="font-medium">{totalCourses}</span> courses
-              </p>
-            </div>
-            <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                >
-                  <span className="sr-only">Previous</span>
-                  <FaChevronUp className="h-5 w-5 transform -rotate-90" aria-hidden="true" />
+      <table className="w-full border">
+        <thead>
+          <tr>
+            <th className="border px-2 py-1">ID</th>
+            <th className="border px-2 py-1">Title</th>
+            <th className="border px-2 py-1">Trainer</th>
+            <th className="border px-2 py-1">Price</th>
+            <th className="border px-2 py-1">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {paginatedCourses.map((course) => (
+            <tr key={course.course_id}>
+              <td className="border px-2 py-1">{course.course_id}</td>
+              <td className="border px-2 py-1">{course.title}</td>
+              <td className="border px-2 py-1">{course.trainer?.trainer_name}</td>
+              <td className="border px-2 py-1">{course.price}</td>
+              <td className="border px-2 py-1">
+                <button onClick={() => handleEdit(course)} className="text-blue-600 px-10">
+                  <FaEdit />
                 </button>
-                {[...Array(Math.ceil(totalCourses / perPage)).keys()].map((page) => (
-                  <button
-                    key={page + 1}
-                    onClick={() => handlePageChange(page + 1)}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === page + 1
-                      ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                      }`}
-                  >
-                    {page + 1}
-                  </button>
-                ))}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage * perPage >= totalCourses}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                >
-                  <span className="sr-only">Next</span>
-                  <FaChevronDown className="h-5 w-5 transform -rotate-90" aria-hidden="true" />
+                <button onClick={() => handleDelete(course.course_id)} className="text-red-600">
+                  <FaTrash />
                 </button>
-              </nav>
-            </div>
-          </div>
-        </div>
-      </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-      {/* Add Course Modal (keep your existing modal code) */}
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start pt-20 z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-4xl overflow-y-auto max-h-[90vh] relative">
             <button
-              onClick={() => setShowForm(false)}
-              className="absolute top-2 right-2 text-gray-500 hover:text-black text-2xl"
+              className="absolute top-2 right-4 text-xl text-gray-600 hover:text-black"
+              onClick={() => {
+                setShowForm(false);
+                setEditingCourseId(null);
+              }}
             >
               ×
             </button>
-            <h3 className="text-xl font-semibold mb-4">Add New Course</h3>
+            <h2 className="text-lg font-semibold mb-4">
+              {editingCourseId ? 'Edit Course' : 'Add New Course'}
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium">Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  required
-                  className="w-full border rounded px-3 py-2 mt-1"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
-                  className="w-full border rounded px-3 py-2 mt-1"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">Bio (Optional)</label>
-                <textarea
-                  name="bio"
-                  value={formData.bio}
-                  onChange={handleChange}
-                  className="w-full border rounded px-3 py-2 mt-1"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium">Price</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                  className="w-full border rounded px-3 py-2 mt-1"
-                />
-              </div>
-
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700">Trainer</label>
-                <select
-                  value={trainerId}
-                  onChange={(e) => setTrainerId(e.target.value)}
-                  required
-                  className="w-full border rounded px-3 py-2 mt-1 bg-white text-black appearance-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="">-- Select Trainer --</option>
-                  {trainers.map((trainer) => (
-                    <option
-                      key={trainer.trainer_id}
-                      value={trainer.trainer_id}
-                      className="text-black bg-white"
-                    >
-                      {trainer.trainer_name}
-                    </option>
-                  ))}
-                </select>
-
-                <div className="pointer-events-none absolute right-3 top-[58px] text-gray-500">
-                  ▼
-                </div>
-              </div>
-
-
-
-              <div>
-                <label className="block text-sm font-medium">Thumbnail (Image)</label>
-                <input
-                  type="file"
-                  name="thumbnail"
-                  accept="image/*"
-                  onChange={handleChange}
-                  className="w-full mt-1"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting || !trainerId}
-                className={`w-full text-white py-2 rounded flex justify-center items-center ${isSubmitting || !trainerId
-                  ? 'bg-green-400 cursor-not-allowed'
-                  : 'bg-green-600 hover:bg-green-700'
-                  }`}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center">
-                    <svg
-                      className="animate-spin h-5 w-5 mr-2 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v8z"
-                      ></path>
-                    </svg>
-                    Submitting...
-                  </div>
-                ) : (
-                  'Submit'
-                )}
+              <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Title" className="w-full border p-2 rounded" required />
+              <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Short Description" className="w-full border p-2 rounded" required></textarea>
+              <textarea name="detailed_description" value={formData.detailed_description} onChange={handleChange} placeholder="Detailed Description" className="w-full border p-2 rounded"></textarea>
+              <textarea name="bio" value={formData.bio} onChange={handleChange} placeholder="Trainer Bio" className="w-full border p-2 rounded"></textarea>
+              <input type="text" name="price" value={formData.price} onChange={handleChange} placeholder="Price" className="w-full border p-2 rounded" required />
+              <input type="text" name="course_overview" value={formData.course_overview} onChange={handleChange} placeholder="Course Overview" className="w-full border p-2 rounded" />
+              <textarea name="what_you_learn" value={formData.what_you_learn} onChange={handleChange} placeholder="What You Will Learn" className="w-full border p-2 rounded"></textarea>
+              <textarea name="requirements" value={formData.requirements} onChange={handleChange} placeholder="Requirements" className="w-full border p-2 rounded"></textarea>
+              <input type="text" name="duration" value={formData.duration} onChange={handleChange} placeholder="Duration" className="w-full border p-2 rounded" />
+              <input type="text" name="course_highlights" value={formData.course_highlights} onChange={handleChange} placeholder="Course Highlights" className="w-full border p-2 rounded" />
+              <select name="level" value={formData.level} onChange={handleChange} className="w-full border p-2 rounded">
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+              <select value={trainerId} onChange={(e) => setTrainerId(e.target.value)} className="w-full border p-2 rounded">
+                <option value="">Select Trainer</option>
+                {trainers.map(trainer => (
+                  <option key={trainer.id} value={trainer.trainer_id}>{trainer.trainer_name}</option>
+                ))}
+              </select>
+              <input type="file" name="thumbnail" onChange={handleChange} className="w-full border p-2 rounded" />
+              <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : (editingCourseId ? 'Update Course' : 'Submit Course')}
               </button>
             </form>
           </div>

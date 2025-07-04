@@ -1,124 +1,64 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 function PaymentSuccess() {
-  const [paymentData, setPaymentData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const sessionId = new URLSearchParams(window.location.search).get('session_id');
+  const [params] = useSearchParams();
+  const sessionId = params.get('session_id');
+  const [enrollment, setEnrollment] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    const fetchEnrollment = async () => {
+      try {
+        const response = await fetch(`https://hydersoft.com/api/payments/session-details?session_id=${sessionId}`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch enrollment details');
+        }
+
+        const data = await response.json();
+        setEnrollment(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
     if (sessionId) {
-      handlePaymentSuccess();
-    } else {
-      setError('No session ID found in URL');
-      setLoading(false);
+      fetchEnrollment();
     }
   }, [sessionId]);
 
-  const handlePaymentSuccess = async () => {
-    try {
-      const response = await fetch(`https://hydersoft.com/api/payments/success?session_id=${sessionId}`);
-      const data = await response.json();
-
-      if (response.ok) {
-        setPaymentData(data);
-      } else {
-        setError(data.error || 'Payment verification failed.');
-      }
-    } catch (err) {
-      setError('Failed to verify payment.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewCourses = () => {
-    window.location.href = '/courses';
-  };
-
-  const handleViewEnrollments = () => {
-    window.location.href = '/my-enrollments';
-  };
-
-  const formatAmount = (amount) => {
-    if (!amount) return '$0.00';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
-  if (loading) {
+  if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verifying your payment...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-red-50 text-red-600 text-lg">
+        ❌ {error}
       </div>
     );
   }
 
-  if (error) {
+  if (!enrollment) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 text-center">
-          <div className="text-red-500 text-6xl mb-4">❌</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Error</h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <button
-            onClick={handleViewCourses}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Back to Courses
-          </button>
-        </div>
+      <div className="min-h-screen flex items-center justify-center text-gray-600">
+        ⏳ Verifying your payment...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 text-center">
-        <div className="text-green-500 text-6xl mb-4">✅</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Payment Successful!</h1>
-
-        {paymentData && (
-          <div className="text-left bg-gray-50 rounded-lg p-4 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-2">Enrollment Details:</h3>
-            <div className="space-y-2 text-sm">
-              <div>
-                <span className="font-medium">Course:</span> {paymentData.course_title}
-              </div>
-              <div>
-                <span className="font-medium">Amount Paid:</span> {formatAmount(paymentData.amount_paid)}
-              </div>
-              <div>
-                <span className="font-medium">Enrollment ID:</span> {paymentData.enrollment_id}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <p className="text-gray-600 mb-6">
-          Congratulations! You’ve successfully enrolled in the course. Enjoy learning!
+    <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 text-center px-4">
+      <div className="bg-white shadow-md rounded-lg p-6 max-w-md w-full">
+        <h1 className="text-2xl font-bold text-green-700 mb-4">🎉 Payment Successful!</h1>
+        <p className="mb-2 text-gray-800">
+          You are now enrolled in <strong>{enrollment.course_title}</strong>
         </p>
-
-        <div className="space-y-3">
-          <button
-            onClick={handleViewEnrollments}
-            className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
-          >
-            View My Enrollments
-          </button>
-          <button
-            onClick={handleViewCourses}
-            className="w-full bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium"
-          >
-            Browse More Courses
-          </button>
-        </div>
+        <p className="mb-2 text-sm text-gray-500">Enrollment Date: {new Date(enrollment.enrollment_date).toLocaleDateString()}</p>
+        <p className="text-sm text-gray-500">Status: {enrollment.status}</p>
+        <a
+          href="/student"
+          className="inline-block mt-6 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+        >
+          Go to Dashboard
+        </a>
       </div>
     </div>
   );

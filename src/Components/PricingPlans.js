@@ -1,11 +1,16 @@
 import React from 'react';
 import Courses from './Student/Courses';
+import { loadStripe } from '@stripe/stripe-js';
+import { useNavigate } from 'react-router-dom';
+
+const stripePromise = loadStripe('pk_test_51RVbIMHKv8G6Dr0HV8vYvZ2bQux6APWVlcvCrgFIBFkrD6Ivga3ssrHYxOnApFQF3LJPg0s5JMBc0mM4YdNhdXKG00L77W7fp6'); // ✅ Use your publishable key
 
 const plans = [
   {
     title: 'Interview Practice ',
     price: '$199',
     type: 'One-time payment',
+    price_id: 'price_1RgK06HKv8G6Dr0HcUWEvedC',
     features: [
       '3 Realistic Mock Interviews (Role-specific)',
       '1-on-1 Personalized Feedback',
@@ -20,6 +25,7 @@ const plans = [
     title: 'Ultimate Bundle',
     price: '$899',
     type: 'One-time payment',
+    price_id: 'price_1RgK83HKv8G6Dr0H8KDskYuk',
     popular: true,
     features: [
       '3000 Job Applications',
@@ -35,9 +41,45 @@ const plans = [
 ];
 
 const PricingPlans = () => {
+  const navigate = useNavigate();
+
+  const handleCheckout = async (priceId) => {
+    const student = JSON.parse(localStorage.getItem('studentUser'));
+    const studentId = student?.student_id || student?.id;
+
+    if (!studentId) {
+      alert('Please login to enroll.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const res = await fetch('http://localhost:8000/api/payments/creates-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${student.token}`,
+        },
+        body: JSON.stringify({ price_id: priceId }),
+      });
+
+      const data = await res.json();
+
+      if (data.id) {
+        const stripe = await stripePromise;
+        await stripe.redirectToCheckout({ sessionId: data.id });
+      } else {
+        alert('Something went wrong during checkout');
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      alert('Checkout failed');
+    }
+  };
+
   return (
     <div className="bg-gray-50 py-20 px-4 sm:px-6 lg:px-20">
-        <div><Courses/></div>
+      <div><Courses /></div>
       <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-4">
         Our Pricing Plans
       </h2>
@@ -48,9 +90,8 @@ const PricingPlans = () => {
         {plans.map((plan, index) => (
           <div
             key={index}
-            className={`relative bg-white p-6 rounded-xl shadow-md border ${
-              plan.popular ? 'border-blue-500 ring-2 ring-blue-300' : 'border-gray-200'
-            }`}
+            className={`relative bg-white p-6 rounded-xl shadow-md border ${plan.popular ? 'border-blue-500 ring-2 ring-blue-300' : 'border-gray-200'
+              }`}
           >
             {plan.popular && (
               <div className="absolute top-0 right-0 bg-black text-white text-xs font-bold px-2 py-1 rounded-bl">
@@ -68,7 +109,10 @@ const PricingPlans = () => {
                 </li>
               ))}
             </ul>
-            <button className="w-full bg-blue-700 text-white font-semibold py-2 rounded hover:bg-blue-800 transition">
+            <button
+              className="w-full bg-blue-700 text-white font-semibold py-2 rounded hover:bg-blue-800 transition"
+              onClick={() => handleCheckout(plan.price_id)}
+            >
               {plan.button}
             </button>
           </div>
