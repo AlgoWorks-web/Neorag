@@ -64,6 +64,7 @@ import PaymentSuccess from "./Components/PaymentSuccess";
 import PricingPlans from "./Components/PricingPlans";
 import AllCoursestogether from "./Components/Student/AllCoursestogether";
 import EnrolledStudents from "./Components/Admin/EnrolledStudents";
+import Agreements from "./Components/Admin/Agreements";
 
 
 const AppContent = () => {
@@ -112,7 +113,7 @@ const AppContent = () => {
         </Route> */}
 
         {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/supremehandling" element={<AdminLogin />} />
         <Route path="/admin-home" element={<AdminDashboard />}>
           <Route index element={<AdminHome />} />
           <Route path="adminstudents" element={<AdminStudents />} />
@@ -122,6 +123,7 @@ const AppContent = () => {
           <Route path="settings" element={<AdminSettings />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="students-enrolled" element={<EnrolledStudents/>}/>
+          <Route path="agreements" element={<Agreements/>}/>
         </Route>
 
         {/* Trainer Routes - Updated to match your component structure */}

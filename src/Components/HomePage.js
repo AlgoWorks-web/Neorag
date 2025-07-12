@@ -2,8 +2,9 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Tooltip from "./Tooltip";
 
+
 // Using higher quality placeholder images with education theme
-const heroImage = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80";
+const heroImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSw4p8Bxx_Y3p8Dc95P5eznTddU9lytNbB2FQ&s";
 const icon1 = "https://cdn-icons-png.flaticon.com/512/3132/3132693.png";
 const icon2 = "https://cdn-icons-png.flaticon.com/512/3176/3176272.png";
 const icon3 = "https://cdn-icons-png.flaticon.com/512/3573/3573565.png";

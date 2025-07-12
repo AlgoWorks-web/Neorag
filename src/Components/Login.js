@@ -20,7 +20,7 @@ const Login = () => {
   const handleResendVerification = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("https://localhost:8000/api/student/resend-verification", {
+      const response = await axios.post("https://hydersoft.com/api/student/resend-verification", {
         email: formData.email,
       });
 

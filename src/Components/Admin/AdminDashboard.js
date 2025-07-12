@@ -21,12 +21,12 @@ const AdminDashboard = () => {
   }, []);
 
   // Authentication check
-  // useEffect(() => {
-  //   const isAuthenticated = localStorage.getItem('adminToken');
-  //   if (!isAuthenticated) {
-  //     navigate('/admin');
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('adminToken');
+    if (!isAuthenticated) {
+      navigate('/supremehandling');
+    }
+  }, [navigate]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);

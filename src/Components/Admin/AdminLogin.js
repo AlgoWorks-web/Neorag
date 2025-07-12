@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminLogin } from '../../api/mockAuth';
 
 const AdminLogin = () => {
-  // State declarations with empty defaults
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -23,20 +21,19 @@ const AdminLogin = () => {
       return;
     }
 
-    try {
-      const response = await adminLogin({ email, password });
-      
-      if (response.success) {
-        localStorage.setItem('adminToken', response.token);
-        navigate('/admin-home');
-      } else {
-        setError(response.message || 'Invalid credentials');
-      }
-    } catch (err) {
-      setError('Login failed. Please try again.');
-    } finally {
-      setLoading(false);
+    // Hardcoded credentials
+    const hardcodedEmail = 'admin@neorag.com';
+    const hardcodedPassword = 'King@5432#';
+
+    // Check if entered credentials match
+    if (email === hardcodedEmail && password === hardcodedPassword) {
+      localStorage.setItem('adminToken', 'mock-admin-token');
+      navigate('/admin-home');
+    } else {
+      setError('Invalid email or password');
     }
+
+    setLoading(false);
   };
 
   return (
@@ -48,7 +45,7 @@ const AdminLogin = () => {
             {error}
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-gray-700 mb-2" htmlFor="email">
@@ -65,7 +62,7 @@ const AdminLogin = () => {
               autoComplete="username"
             />
           </div>
-          
+
           <div className="mb-6">
             <label className="block text-gray-700 mb-2" htmlFor="password">
               Password
@@ -81,15 +78,13 @@ const AdminLogin = () => {
               autoComplete="current-password"
             />
           </div>
-          
+
           <button
             type="submit"
             disabled={loading || !email || !password}
             className={`w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition ${
               loading ? 'opacity-70 cursor-not-allowed' : ''
-            } ${
-              !email || !password ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            } ${!email || !password ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>

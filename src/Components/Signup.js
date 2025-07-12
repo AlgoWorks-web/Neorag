@@ -28,7 +28,7 @@ const Signup = () => {
 
     try {
       const response = await axios.post("https://hydersoft.com/api/student/register", formData);
-      // const response = await axios.post("http://localhost:8000/api/student/register", formData);
+     //  const response = await axios.post("http://localhost:8000/api/student/register", formData);
       setMessage("🎉 Registration successful! check your mail and  You can now log in.");
       setIsSuccess(true);
       setFormData({ username: "", email: "", password: "" });

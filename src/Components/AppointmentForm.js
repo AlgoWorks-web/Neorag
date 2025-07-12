@@ -80,7 +80,7 @@ const AppointmentForm = () => {
         msg: formData.notes,
       };
 
-      const response = await fetch('http://localhost:8000/api/bookanappointment', {
+      const response = await fetch('https://hydersoft.com/api/bookanappointment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

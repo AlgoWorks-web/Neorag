@@ -1,4 +1,4 @@
-import { FaTimes, FaUsers, FaGem, FaBell, FaCog, FaSymfony } from 'react-icons/fa';
+import { FaTimes, FaUsers, FaGem, FaBell, FaCog, FaSymfony, FaRegMehBlank } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 
 const AdminSidebar = ({ sidebarOpen, toggleSidebar }) => {
@@ -54,6 +54,7 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }) => {
             { to: "Adminstudents", icon: <FaUsers className="mr-3" />, text: "Students" },
             { to: "adminstrainers", icon: <FaUsers className="mr-3" />, text: "Trainers" },
             { to: "Admincourses", icon: <FaGem className="mr-3" />, text: "Courses" },
+            { to: "agreements", icon: <FaRegMehBlank className="mr-3" />, text: "Agreements" },
             { to: "students-enrolled", icon: <FaUsers className='mr-3' />, text: "EnrolledStudents" },
             { to: "plans", icon: <FaSymfony className="mr-3" />, text: "Plans" },
             { to: "reports", icon: <FaBell className="mr-3" />, text: "Reports" },
