@@ -78,9 +78,15 @@ function Useragreement() {
             };
 
             // Draw agreement text
-            const lines = agreementText.split('\n').flatMap(line =>
-                wrapText(line, width - 2 * margin, font, fontSize)
-            );
+            // const lines = agreementText.split('\n').flatMap(line =>
+            //     wrapText(line, width - 2 * margin, font, fontSize)
+            // );
+
+            const lines = agreementText
+                .replace(/\t/g, '    ') // replace tabs with 4 spaces
+                .split('\n')
+                .flatMap(line => wrapText(line, width - 2 * margin, font, fontSize));
+
 
             lines.forEach((line) => {
                 if (y - lineHeight < 80) return; // leave space for signature

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Edit, Trash2, Plus } from 'lucide-react';
 
 function AdminCourses() {
   const [showForm, setShowForm] = useState(false);
@@ -29,45 +27,170 @@ function AdminCourses() {
     duration: '',
     level: 'beginner',
     course_highlights: '',
-    course_content: [{ title: '', lessons: [''] }]
+    course_content: '',
+    is_active: true
   });
+
+  // Validation errors state
+  const [validationErrors, setValidationErrors] = useState({});
+
+  // Toast notification function
+  const showToast = (message, type = 'info') => {
+    console.log(`${type.toUpperCase()}: ${message}`);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const trainersResponse = await fetch('https://hydersoft.com/api/admin/trainer/trainers', {
-          headers: { Accept: 'application/json' },
-        });
-        const trainersData = await trainersResponse.json();
-        setTrainers(trainersData);
+        setLoading(true);
+        setError(null);
+        console.log('Fetching data...');
 
-        const coursesResponse = await fetch('https://hydersoft.com/api/courses/getcourse');
-        const coursesData = await coursesResponse.json();
-        setCourses(coursesData);
-        setTotalCourses(coursesData.length);
+        // Fetch trainers from API
+        try {
+          const trainersResponse = await fetch('https://hydersoft.com/api/admin/trainer/trainers', {
+            headers: { Accept: 'application/json' },
+          });
+
+          if (trainersResponse.ok) {
+            const trainersData = await trainersResponse.json();
+            console.log('Trainers fetched:', trainersData);
+            setTrainers(trainersData || []);
+          } else {
+            console.warn('Failed to fetch trainers');
+            setTrainers([]);
+          }
+        } catch (trainerError) {
+          console.warn('Error fetching trainers:', trainerError);
+          setTrainers([]);
+        }
+
+        // Fetch courses from API
+        try {
+          const coursesResponse = await fetch('https://hydersoft.com/api/courses/getcourse');
+
+          if (coursesResponse.ok) {
+            const coursesData = await coursesResponse.json();
+            console.log('Courses fetched:', coursesData);
+            setCourses(coursesData || []);
+            setTotalCourses((coursesData || []).length);
+          } else {
+            console.warn('Failed to fetch courses, showing empty state');
+            setCourses([]);
+            setTotalCourses(0);
+          }
+        } catch (courseError) {
+          console.warn('Error fetching courses:', courseError);
+          setCourses([]);
+          setTotalCourses(0);
+        }
+
       } catch (err) {
-        setError(err.message);
         console.error('Error fetching data:', err);
+        // Don't set error state, just show empty state
+        setCourses([]);
+        setTotalCourses(0);
+        setTrainers([]);
+        showToast('Unable to load data. You can still add courses.', 'warning');
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
+  // Comprehensive validation function for ALL fields
+  const validateForm = () => {
+    const errors = {};
+
+    // Title validation
+    if (!formData.title || !formData.title.trim()) {
+      errors.title = 'Title is required';
+    }
+
+    // Description validation
+    if (!formData.description || !formData.description.trim()) {
+      errors.description = 'Description is required';
+    }
+
+    // Detailed description validation
+    if (!formData.detailed_description || !formData.detailed_description.trim()) {
+      errors.detailed_description = 'Detailed description is required';
+    }
+
+    // Bio validation
+    if (!formData.bio || !formData.bio.trim()) {
+      errors.bio = 'Trainer bio is required';
+    }
+
+    // Price validation
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      errors.price = 'Price is required and must be greater than 0';
+    }
+
+    // Course overview validation
+    if (!formData.course_overview || !formData.course_overview.trim()) {
+      errors.course_overview = 'Course overview is required';
+    }
+
+    // What you learn validation
+    if (!formData.what_you_learn || !formData.what_you_learn.trim()) {
+      errors.what_you_learn = 'What you will learn is required';
+    }
+
+    // Requirements validation
+    if (!formData.requirements || !formData.requirements.trim()) {
+      errors.requirements = 'Requirements are required';
+    }
+
+    // Duration validation
+    if (!formData.duration || !formData.duration.trim()) {
+      errors.duration = 'Duration is required';
+    }
+
+    // Course highlights validation
+    if (!formData.course_highlights || !formData.course_highlights.trim()) {
+      errors.course_highlights = 'Course highlights are required';
+    }
+
+    // Level validation
+    if (!formData.level || !['beginner', 'intermediate', 'advanced'].includes(formData.level)) {
+      errors.level = 'Level is required';
+    }
+
+    if (!formData.course_content || !formData.course_content.trim()) {
+      errors.course_content = 'Course content are required';
+    }
+
+    // Trainer validation
+    if (!trainerId) {
+      errors.trainerId = 'Trainer selection is required';
+    }
+
+    // Thumbnail validation (required for new courses)
+    if (!editingCourseId && !formData.thumbnail) {
+      errors.thumbnail = 'Thumbnail is required';
+    }
+
+    return errors;
+  };
+
+  // Filter courses based on search term
   const filteredCourses = courses.filter(course =>
-    course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.trainer.trainer_name.toLowerCase().includes(searchTerm.toLowerCase())
+    course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.trainer?.trainer_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Paginate filtered courses
   const paginatedCourses = filteredCourses.slice(
     (currentPage - 1) * perPage,
     currentPage * perPage
   );
 
-  // Fixed: This function should populate the form with course data for editing
   const handleEdit = (course) => {
+    console.log('Editing course:', course);
     setEditingCourseId(course.course_id);
     setFormData({
       title: course.title || '',
@@ -75,16 +198,18 @@ function AdminCourses() {
       detailed_description: course.detailed_description || '',
       bio: course.bio || '',
       price: course.price || '',
-      thumbnail: null, // Don't set existing file
+      thumbnail: null,
       course_overview: course.course_overview || '',
       what_you_learn: course.what_you_learn || '',
       requirements: course.requirements || '',
       duration: course.duration || '',
       level: course.level || 'beginner',
       course_highlights: course.course_highlights || '',
-      course_content: course.course_content || [{ title: '', lessons: [''] }]
+      course_content: course.course_content || '',
+      is_active: course.is_active !== undefined ? course.is_active : true
     });
     setTrainerId(course.trainer?.trainer_id || '');
+    setValidationErrors({});
     setShowForm(true);
   };
 
@@ -97,56 +222,83 @@ function AdminCourses() {
       });
 
       if (res.ok) {
-        toast.success('✅ Course deleted successfully.');
+        showToast('Course deleted successfully.', 'success');
         const updatedCourses = courses.filter((c) => c.course_id !== courseId);
         setCourses(updatedCourses);
         setTotalCourses(updatedCourses.length);
       } else {
         const error = await res.json();
-        toast.error(error.message || 'Failed to delete course');
+        showToast(error.message || 'Failed to delete course', 'error');
       }
     } catch (error) {
       console.error('Delete failed:', error);
-      toast.error('Something went wrong while deleting.');
+      showToast('Something went wrong while deleting.', 'error');
     }
   };
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files, type, checked } = e.target;
+
     if (name === 'thumbnail') {
       setFormData(prev => ({ ...prev, [name]: files[0] }));
+    } else if (type === 'checkbox') {
+      setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+
+    // Clear validation error when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleTrainerChange = (e) => {
+    setTrainerId(e.target.value);
+    if (validationErrors.trainerId) {
+      setValidationErrors(prev => ({ ...prev, trainerId: '' }));
+    }
+  };
 
-    if (!trainerId) {
-      toast.warning('Please select a trainer.');
+  const handleSubmit = async () => {
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      console.log("Validation errors:", errors);
+      setValidationErrors(errors);
+      showToast('Please fill in all required fields marked with *', 'error');
       return;
     }
 
     setIsSubmitting(true);
+
     const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key === 'course_content') {
-        data.append(key, JSON.stringify(value));
-      } else if (key === 'thumbnail' && value) {
-        data.append(key, value);
-      } else if (key !== 'thumbnail') {
-        data.append(key, value);
-      }
-    });
+
+    // Append every field to FormData — force empty string if field is undefined/null
+    data.append('title', formData.title || '');
+    data.append('description', formData.description || '');
+    data.append('detailed_description', formData.detailed_description || '');
+    data.append('bio', formData.bio || '');
+    data.append('price', formData.price || '');
+    data.append('course_overview', formData.course_overview || '');
+    data.append('what_you_learn', formData.what_you_learn || '');
+    data.append('requirements', formData.requirements || '');
+    data.append('duration', formData.duration || '');
+    data.append('level', formData.level || 'beginner');
+    data.append('course_highlights', formData.course_highlights || '');
+    data.append('course_content', formData.course_content || '');
+    data.append('is_active', formData.is_active ? '1' : '0');
     data.append('trainer_id', parseInt(trainerId, 10));
-    data.append('is_active', '1');
+
+    // Only append thumbnail if selected
+    if (formData.thumbnail) {
+      data.append('thumbnail', formData.thumbnail);
+    }
 
     let url = 'https://hydersoft.com/api/courses/uploadcourse';
     let method = 'POST';
 
     if (editingCourseId) {
-      data.append('_method', 'PUT');  // Laravel requires this override when using FormData
+      data.append('_method', 'PUT');
       url = `https://hydersoft.com/api/courses/${editingCourseId}`;
     }
 
@@ -154,29 +306,33 @@ function AdminCourses() {
       const response = await fetch(url, {
         method,
         body: data,
-        headers: { Accept: 'application/json' },
+        headers: {
+          Accept: 'application/json',
+        },
       });
 
       const contentType = response.headers.get('content-type');
       if (!response.ok) {
         if (contentType && contentType.includes('application/json')) {
           const error = await response.json();
-          toast.error(error.message || 'Upload failed');
+          showToast(error.message || 'Upload failed', 'error');
         } else {
-          const errorText = await response.text();
-          toast.error('Server returned an unexpected response.');
+          showToast('Server returned an unexpected response.', 'error');
         }
         return;
       }
 
       await response.json();
 
+      // Refresh courses
       const coursesResponse = await fetch('https://hydersoft.com/api/courses/getcourse');
       const coursesData = await coursesResponse.json();
       setCourses(coursesData);
       setTotalCourses(coursesData.length);
 
-      toast.success(editingCourseId ? '✅ Course updated successfully!' : '✅ Course uploaded successfully!');
+      showToast(editingCourseId ? 'Course updated successfully!' : 'Course uploaded successfully!', 'success');
+
+      // Reset form
       setShowForm(false);
       setEditingCourseId(null);
       setFormData({
@@ -192,18 +348,21 @@ function AdminCourses() {
         duration: '',
         level: 'beginner',
         course_highlights: '',
-        course_content: [{ title: '', lessons: [''] }]
+        course_content: '',
+        is_active: true
       });
       setTrainerId('');
+      setValidationErrors({});
+
     } catch (err) {
       console.error('Upload error:', err);
-      toast.error('Something went wrong.');
+      showToast('Something went wrong: ' + err.message, 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Function to reset form when adding new course
+
   const handleAddNew = () => {
     setEditingCourseId(null);
     setFormData({
@@ -219,97 +378,479 @@ function AdminCourses() {
       duration: '',
       level: 'beginner',
       course_highlights: '',
-      course_content: [{ title: '', lessons: [''] }]
+      course_content: '',
+      is_active: true
     });
     setTrainerId('');
+    setValidationErrors({});
     setShowForm(true);
   };
 
-  if (loading) return <div className="p-4">Loading...</div>;
-  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  // Loading state
+  if (loading) {
+    return (
+      <div className="p-4 flex justify-center items-center min-h-screen">
+        <div className="text-lg text-gray-600">Loading courses...</div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <strong>Error:</strong> {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4">
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar newestOnTop closeOnClick />
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">Courses</h2>
-        <button onClick={handleAddNew} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          <FaPlus /> Add Course
+    <div className="p-4 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800">Courses ({totalCourses})</h2>
+        <button
+          onClick={handleAddNew}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Plus size={20} /> Add Course
         </button>
       </div>
 
-      <table className="w-full border">
-        <thead>
-          <tr>
-            <th className="border px-2 py-1">ID</th>
-            <th className="border px-2 py-1">Title</th>
-            <th className="border px-2 py-1">Trainer</th>
-            <th className="border px-2 py-1">Price</th>
-            <th className="border px-2 py-1">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {paginatedCourses.map((course) => (
-            <tr key={course.course_id}>
-              <td className="border px-2 py-1">{course.course_id}</td>
-              <td className="border px-2 py-1">{course.title}</td>
-              <td className="border px-2 py-1">{course.trainer?.trainer_name}</td>
-              <td className="border px-2 py-1">{course.price}</td>
-              <td className="border px-2 py-1">
-                <button onClick={() => handleEdit(course)} className="text-blue-600 px-10">
-                  <FaEdit />
-                </button>
-                <button onClick={() => handleDelete(course.course_id)} className="text-red-600">
-                  <FaTrash />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Search */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search courses..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg w-full md:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
+      {/* Table */}
+      <div className="overflow-x-auto bg-white rounded-lg shadow">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-50 border-b">
+              <th className="text-left px-4 py-3 font-medium text-gray-900">ID</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">Title</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">Trainer</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">Price</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">Level</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">Active</th>
+              <th className="text-left px-4 py-3 font-medium text-gray-900">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedCourses.length > 0 ? (
+              paginatedCourses.map((course) => (
+                <tr key={course.course_id} className="border-b hover:bg-gray-50">
+                  <td className="px-4 py-3 text-gray-900">{course.course_id}</td>
+                  <td className="px-4 py-3 text-gray-900">{course.title}</td>
+                  <td className="px-4 py-3 text-gray-600">{course.trainer?.trainer_name || 'N/A'}</td>
+                  <td className="px-4 py-3 text-gray-900">${course.price}</td>
+                  <td className="px-4 py-3 text-gray-600 capitalize">{course.level}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 text-xs rounded-full ${course.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                      {course.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(course)}
+                        className="text-blue-600 hover:text-blue-800 p-1"
+                        title="Edit course"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(course.course_id)}
+                        className="text-red-600 hover:text-red-800 p-1"
+                        title="Delete course"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="px-4 py-12 text-center">
+                  <div className="flex flex-col items-center justify-center text-gray-500">
+                    <div className="text-6xl mb-4">📚</div>
+                    <h3 className="text-lg font-medium mb-2">No courses found</h3>
+                    <p className="text-sm mb-4">
+                      {searchTerm
+                        ? `No courses match "${searchTerm}". Try a different search term.`
+                        : 'Get started by adding your first course.'
+                      }
+                    </p>
+                    {!searchTerm && (
+                      <button
+                        onClick={handleAddNew}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <Plus size={16} /> Add Your First Course
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination would go here if needed */}
+      {filteredCourses.length > perPage && (
+        <div className="mt-6 flex justify-center">
+          <div className="text-sm text-gray-600">
+            Showing {Math.min(filteredCourses.length, perPage)} of {filteredCourses.length} courses
+          </div>
+        </div>
+      )}
+
+      {/* Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start pt-20 z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-4xl overflow-y-auto max-h-[90vh] relative">
+          <div className="bg-white p-6 rounded-lg w-full max-w-4xl overflow-y-auto max-h-[90vh] relative mx-4">
             <button
-              className="absolute top-2 right-4 text-xl text-gray-600 hover:text-black"
+              className="absolute top-4 right-4 text-2xl text-gray-400 hover:text-gray-600"
               onClick={() => {
                 setShowForm(false);
                 setEditingCourseId(null);
+                setValidationErrors({});
               }}
             >
               ×
             </button>
-            <h2 className="text-lg font-semibold mb-4">
+
+            <h2 className="text-xl font-semibold mb-6 text-gray-800">
               {editingCourseId ? 'Edit Course' : 'Add New Course'}
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input type="text" name="title" value={formData.title} onChange={handleChange} placeholder="Title" className="w-full border p-2 rounded" required />
-              <textarea name="description" value={formData.description} onChange={handleChange} placeholder="Short Description" className="w-full border p-2 rounded" required></textarea>
-              <textarea name="detailed_description" value={formData.detailed_description} onChange={handleChange} placeholder="Detailed Description" className="w-full border p-2 rounded"></textarea>
-              <textarea name="bio" value={formData.bio} onChange={handleChange} placeholder="Trainer Bio" className="w-full border p-2 rounded"></textarea>
-              <input type="text" name="price" value={formData.price} onChange={handleChange} placeholder="Price" className="w-full border p-2 rounded" required />
-              <input type="text" name="course_overview" value={formData.course_overview} onChange={handleChange} placeholder="Course Overview" className="w-full border p-2 rounded" />
-              <textarea name="what_you_learn" value={formData.what_you_learn} onChange={handleChange} placeholder="What You Will Learn" className="w-full border p-2 rounded"></textarea>
-              <textarea name="requirements" value={formData.requirements} onChange={handleChange} placeholder="Requirements" className="w-full border p-2 rounded"></textarea>
-              <input type="text" name="duration" value={formData.duration} onChange={handleChange} placeholder="Duration" className="w-full border p-2 rounded" />
-              <input type="text" name="course_highlights" value={formData.course_highlights} onChange={handleChange} placeholder="Course Highlights" className="w-full border p-2 rounded" />
-              <select name="level" value={formData.level} onChange={handleChange} className="w-full border p-2 rounded">
-                <option value="beginner">Beginner</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-              </select>
-              <select value={trainerId} onChange={(e) => setTrainerId(e.target.value)} className="w-full border p-2 rounded">
-                <option value="">Select Trainer</option>
-                {trainers.map(trainer => (
-                  <option key={trainer.id} value={trainer.trainer_id}>{trainer.trainer_name}</option>
-                ))}
-              </select>
-              <input type="file" name="thumbnail" onChange={handleChange} className="w-full border p-2 rounded" />
-              <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : (editingCourseId ? 'Update Course' : 'Submit Course')}
-              </button>
-            </form>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Title <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.title ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder="Enter course title"
+                  required
+                />
+                {validationErrors.title && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.title}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Description <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.description ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder="Enter course description"
+                  required
+                  rows="3"
+                />
+                {validationErrors.description && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.description}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Detailed Description <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="detailed_description"
+                  value={formData.detailed_description}
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.detailed_description ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder="Enter detailed course description"
+                  required
+                  rows="4"
+                />
+                {validationErrors.detailed_description && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.detailed_description}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Course OverView <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="course_overview"
+                  value={formData.course_overview}
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.course_overview ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder="Enter detailed course description"
+                  required
+                  rows="4"
+                />
+                {validationErrors.course_overview && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.course_overview}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  what_you_learn <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="what_you_learn"
+                  value={formData.what_you_learn}
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.what_you_learn ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder="Enter detailed course description"
+                  required
+                  rows="4"
+                />
+                {validationErrors.what_you_learn && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.what_you_learn}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Requirements <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="requirements"
+                  value={formData.requirements}
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.requirements ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder="Enter detailed course description"
+                  required
+                  rows="4"
+                />
+                {validationErrors.requirements && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.requirements}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Course Content <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="course_content"
+                  value={formData.course_content}
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.course_content ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder="Enter detailed course description"
+                  required
+                  rows="4"
+                />
+                {validationErrors.course_content && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.course_content}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Course Highlights<span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="course_highlights"
+                  value={formData.course_highlights}
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.course_highlights ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder="Enter detailed course description"
+                  required
+                  rows="4"
+                />
+                {validationErrors.course_highlights && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.course_highlights}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Trainer Bio<span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.bio ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  placeholder="Enter detailed course description"
+                  required
+                  rows="4"
+                />
+                {validationErrors.bio && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.bio}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Price <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.price ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                    placeholder="0.00"
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                  {validationErrors.price && (
+                    <p className="text-red-500 text-sm mt-1">{validationErrors.price}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Duration <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="duration"
+                    value={formData.duration}
+                    onChange={handleChange}
+                    className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.duration ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                    placeholder="e.g., 4 weeks, 10 hours"
+                    required
+                  />
+                  {validationErrors.duration && (
+                    <p className="text-red-500 text-sm mt-1">{validationErrors.duration}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Level <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="level"
+                    value={formData.level}
+                    onChange={handleChange}
+                    className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.level ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                    required
+                  >
+                    <option value="">Select Level</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                  {validationErrors.level && (
+                    <p className="text-red-500 text-sm mt-1">{validationErrors.level}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Trainer <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={trainerId}
+                    onChange={handleTrainerChange}
+                    className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.trainerId ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                    required
+                  >
+                    <option value="">Select Trainer</option>
+                    {trainers.map(trainer => (
+                      <option key={trainer.trainer_id} value={trainer.trainer_id}>
+                        {trainer.trainer_name}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.trainerId && (
+                    <p className="text-red-500 text-sm mt-1">{validationErrors.trainerId}</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Thumbnail <span className="text-red-500">*</span>
+                  {editingCourseId && (
+                    <span className="text-gray-500 text-sm"> (leave empty to keep current)</span>
+                  )}
+                </label>
+                <input
+                  type="file"
+                  name="thumbnail"
+                  onChange={handleChange}
+                  className={`w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${validationErrors.thumbnail ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  required={!editingCourseId}
+                  accept="image/*"
+                />
+                {validationErrors.thumbnail && (
+                  <p className="text-red-500 text-sm mt-1">{validationErrors.thumbnail}</p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleChange}
+                  className="rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <label className="text-sm font-medium text-gray-700">
+                  Course is Active
+                </label>
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingCourseId(null);
+                    setValidationErrors({});
+                  }}
+                  className="flex-1 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg disabled:bg-gray-400 transition-colors"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : (editingCourseId ? 'Update Course' : 'Submit Course')}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

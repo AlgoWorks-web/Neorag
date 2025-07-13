@@ -16,7 +16,7 @@ const AdminStudents = () => {
       try {
         setLoading(true);
         const response = await axios.get(`https://hydersoft.com/api/student/verified?page=${currentPage}&per_page=${perPage}`);
-        
+
         if (response.data.success) {
           setStudents(response.data.data);
           setTotalStudents(response.data.meta.total);
@@ -31,7 +31,7 @@ const AdminStudents = () => {
     fetchStudents();
   }, [currentPage, perPage]);
 
-  const filteredStudents = students.filter(student => 
+  const filteredStudents = students.filter(student =>
     student.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -85,30 +85,21 @@ const AdminStudents = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredStudents.map((student) => (
-                <tr key={student.user_id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.user_id}</td>
+                <tr key={student.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{student.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(student.created_on).toLocaleDateString()}
+                    {new Date(student.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      student.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {student.is_active ? 'Active' : 'Inactive'}
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      Active
                     </span>
                   </td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-4">
-                      <FaEdit />
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      <FaTrash />
-                    </button>
-                  </td> */}
                 </tr>
               ))}
             </tbody>
+
           </table>
         </div>
 
@@ -152,11 +143,10 @@ const AdminStudents = () => {
                   <button
                     key={page + 1}
                     onClick={() => handlePageChange(page + 1)}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                      currentPage === page + 1
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === page + 1
                         ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
                         : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     {page + 1}
                   </button>
