@@ -65,6 +65,8 @@ import PricingPlans from "./Components/PricingPlans";
 import AllCoursestogether from "./Components/Student/AllCoursestogether";
 import EnrolledStudents from "./Components/Admin/EnrolledStudents";
 import Agreements from "./Components/Admin/Agreements";
+import PublicCourses from "./Components/PublicCourses";
+import PublicCourseDetails from "./Components/PublicCourseDetails";
 
 
 const AppContent = () => {
@@ -98,7 +100,9 @@ const AppContent = () => {
         <Route path="/terms" element={<Termstouse />} />
         <Route path="/sla" element={<Sla />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        
+        <Route path="/publiccourses" element={<PublicCourses/>}/>
+        <Route path="/public-course-details/:courseId" element={<PublicCourseDetails />} />
+         
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/book-appointment" element={<AppointmentForm />} />
         <Route path="/pricingplans" element={<PricingPlans/>}/>

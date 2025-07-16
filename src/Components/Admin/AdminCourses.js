@@ -430,7 +430,7 @@ function AdminCourses() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
+      <div className="overflow-x-auto bg-white rounded-lg shadow p-24">
         <table className="w-full">
           <thead>
             <tr className="bg-gray-50 border-b">

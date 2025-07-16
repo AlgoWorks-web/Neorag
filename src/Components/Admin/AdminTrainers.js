@@ -4,6 +4,7 @@ import { FaEdit, FaTrash, FaChevronDown, FaChevronUp, FaSearch, FaUserPlus, FaUs
 function AdminTrainers() {
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editTrainerId, setEditTrainerId] = useState(null);
   const [formData, setFormData] = useState({
     trainerName: '',
     email: '',
@@ -140,42 +141,101 @@ function AdminTrainers() {
     }
   };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+
+  //   const data = new FormData();
+  //   data.append('trainer_name', formData.trainerName);
+  //   data.append('email', formData.email);
+  //   if (formData.profilePic) {
+  //     data.append('profile_pic', formData.profilePic);
+  //   }
+  //   data.append('bio', formData.bio);
+  //   data.append('expertise', formData.expertise);
+  //   data.append('location', formData.location);
+  //   data.append('phone_number', formData.phone_number);
+
+  //   try {
+  //     const response = await fetch('https://hydersoft.com/api/admin/trainer/trainers', {
+  //       method: 'POST',
+  //       body: data,
+  //     });
+
+  //     const result = await response.json();
+  //     if (response.ok) {
+  //       alert('Trainer onboarded successfully.');
+  //       setFormData({
+  //         trainerName: '',
+  //         email: '',
+  //         profilePic: null,
+  //         bio: '',
+  //         expertise: '',
+  //         location: '',
+  //         phone_number: '',
+  //       });
+  //       setShowForm(false);
+  //       setCurrentPage(1);
+  //       // Refresh the trainers list
+  //       window.location.reload();
+  //     } else {
+  //       alert(result.message || 'Something went wrong.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting form:', error);
+  //     alert('Error submitting the form.');
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const data = new FormData();
     data.append('trainer_name', formData.trainerName);
-    data.append('email', formData.email);
-    if (formData.profilePic) {
-      data.append('profile_pic', formData.profilePic);
-    }
     data.append('bio', formData.bio);
     data.append('expertise', formData.expertise);
     data.append('location', formData.location);
     data.append('phone_number', formData.phone_number);
 
+    if (!editTrainerId && formData.email) {
+      // Only include email during onboarding (not editing)
+      data.append('email', formData.email);
+    }
+
+    if (formData.profilePic) {
+      data.append('profile_pic', formData.profilePic);
+    }
+
     try {
-      const response = await fetch('https://hydersoft.com/api/admin/trainer/trainers', {
+      const url = editTrainerId
+        ? `https://hydersoft.com/api/admin/trainer/trainers/update/${editTrainerId}`
+        : 'https://hydersoft.com/api/admin/trainer/trainers';
+
+      const response = await fetch(url, {
         method: 'POST',
         body: data,
       });
 
       const result = await response.json();
+
       if (response.ok) {
-        alert('Trainer onboarded successfully.');
+        alert(editTrainerId ? 'Trainer updated successfully.' : 'Trainer onboarded successfully.');
+
         setFormData({
           trainerName: '',
-          email: '',
+          email: '', // Reset after onboarding
           profilePic: null,
           bio: '',
           expertise: '',
           location: '',
           phone_number: '',
         });
+
         setShowForm(false);
-        setCurrentPage(1);
-        // Refresh the trainers list
+        setEditTrainerId(null);
         window.location.reload();
       } else {
         alert(result.message || 'Something went wrong.');
@@ -188,6 +248,30 @@ function AdminTrainers() {
     }
   };
 
+
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this trainer?')) return;
+
+    try {
+      const response = await fetch(`https://hydersoft.com/api/admin/trainer/trainers/${id}`, {
+        method: 'DELETE',
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert('Trainer deleted successfully.');
+        window.location.reload();
+      } else {
+        alert(result.message || 'Something went wrong.');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Error deleting trainer.');
+    }
+  };
+
+
   // Retry function for failed requests
   const handleRetry = () => {
     setError(null);
@@ -198,27 +282,30 @@ function AdminTrainers() {
 
   return (
     <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">TRAINERS MANAGEMENT</h2>
-        <div className="flex space-x-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search trainers..."
-              className="pl-10 pr-4 py-2 border rounded-lg"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <FaSearch className="absolute left-3 top-3 text-gray-400" />
-          </div>
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center"
-            onClick={() => setShowForm(true)}
-          >
-            <FaUserPlus className="mr-2" /> Onboard Trainer
-          </button>
-        </div>
-      </div>
+   <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+  <h2 className="text-2xl font-bold text-center md:text-left">TRAINERS MANAGEMENT</h2>
+  
+  <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
+    <div className="relative w-full sm:w-auto">
+      <input
+        type="text"
+        placeholder="Search trainers..."
+        className="pl-10 pr-4 py-2 border rounded-lg w-full sm:w-64"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+      <FaSearch className="absolute left-3 top-3 text-gray-400" />
+    </div>
+
+    <button
+      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center"
+      onClick={() => setShowForm(true)}
+    >
+      <FaUserPlus className="mr-2" /> Onboard Trainer
+    </button>
+  </div>
+</div>
+
 
       {/* Trainers List */}
       {loading ? (
@@ -251,38 +338,30 @@ function AdminTrainers() {
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto sm:overflow-visible">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trainer
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact Info
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Expertise
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Trainer</th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Expertise</th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                  <th className="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
+
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredTrainers.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                    <td colSpan="5" className="px-3 sm:px-6 py-2 sm:py-4 text-center text-gray-500">
                       {trainers.length === 0 ? 'No trainers found' : 'No trainers match your search'}
                     </td>
                   </tr>
                 ) : (
                   filteredTrainers.map((trainer, index) => (
                     <tr key={trainer.id || trainer.email || index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
+
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
                             {trainer.profile_pic || trainer.profilePic ? (
@@ -313,7 +392,7 @@ function AdminTrainers() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
                         <div className="text-sm text-gray-900 flex items-center">
                           <FaEnvelope className="mr-2 text-gray-400" />
                           {trainer.email || 'N/A'}
@@ -330,19 +409,39 @@ function AdminTrainers() {
                           {trainer.expertise || 'N/A'}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
                         <div className="text-sm text-gray-900 flex items-center">
                           <FaMapMarkerAlt className="mr-2 text-gray-400" />
                           {trainer.location || 'N/A'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-indigo-600 hover:text-indigo-900 mr-3">
+                        <button
+                          className="text-indigo-600 hover:text-indigo-900 mr-3"
+                          onClick={() => {
+                            setFormData({
+                              trainerName: trainer.trainer_name || '',
+                              email: trainer.email || '', // readonly field
+                              profilePic: null,
+                              bio: trainer.bio || '',
+                              expertise: trainer.expertise || '',
+                              location: trainer.location || '',
+                              phone_number: trainer.phone_number || '',
+                            });
+                            setEditTrainerId(trainer.trainer_id); // set to enter edit mode
+                            setShowForm(true);
+                          }}
+                        >
                           <FaEdit />
                         </button>
-                        <button className="text-red-600 hover:text-red-900">
+
+                        <button
+                          className="text-red-600 hover:text-red-900"
+                          onClick={() => handleDelete(trainer.trainer_id)}
+                        >
                           <FaTrash />
                         </button>
+
                       </td>
                     </tr>
                   ))
@@ -408,8 +507,8 @@ function AdminTrainers() {
                           <button
                             onClick={() => handlePageChange(page)}
                             className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === page
-                                ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                              ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
+                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                               }`}
                           >
                             {page}
@@ -434,7 +533,7 @@ function AdminTrainers() {
       {/* Modal form */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md relative">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto relative">
             <button
               onClick={() => setShowForm(false)}
               className="absolute top-2 right-2 text-gray-500 hover:text-black text-2xl"
@@ -463,6 +562,7 @@ function AdminTrainers() {
                   onChange={handleChange}
                   required
                   className="w-full border rounded px-3 py-2 mt-1"
+                  disabled={!!editTrainerId}
                 />
               </div>
               <div>
@@ -552,7 +652,12 @@ function AdminTrainers() {
           </div>
         </div>
       )}
+
     </div>
+
+
+
+
   );
 }
 
