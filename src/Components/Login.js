@@ -49,10 +49,10 @@ const Login = () => {
     try {
       const endpoint =
         role === "student"
-          // ? "http://localhost:8000/api/student/login"
-          // : "http://localhost:8000/api/admin/trainer/login";
-          ? "https://hydersoft.com/api/student/login"
-          : "https://hydersoft.com/api/admin/trainer/login";
+          ? "http://localhost:8000/api/student/login"
+          : "http://localhost:8000/api/admin/trainer/login";
+          // ? "https://hydersoft.com/api/student/login"
+          // : "https://hydersoft.com/api/admin/trainer/login";
 
       const payload =
         role === "student"
