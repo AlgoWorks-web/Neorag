@@ -56,9 +56,9 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }) => {
             { to: "Admincourses", icon: <FaGem className="mr-3" />, text: "Courses" },
             { to: "agreements", icon: <FaRegMehBlank className="mr-3" />, text: "Agreements" },
             { to: "students-enrolled", icon: <FaUsers className='mr-3' />, text: "EnrolledStudents" },
-            { to: "plans", icon: <FaSymfony className="mr-3" />, text: "Plans" },
-            { to: "reports", icon: <FaBell className="mr-3" />, text: "Reports" },
-            { to: "settings", icon: <FaCog className="mr-3" />, text: "Settings" }
+            // { to: "plans", icon: <FaSymfony className="mr-3" />, text: "Plans" },
+            // { to: "reports", icon: <FaBell className="mr-3" />, text: "Reports" },
+            // { to: "settings", icon: <FaCog className="mr-3" />, text: "Settings" }
           ].map((item) => (
             <NavLink
               key={item.to}

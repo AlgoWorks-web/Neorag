@@ -430,80 +430,165 @@ function AdminCourses() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto bg-white rounded-lg shadow p-24">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gray-50 border-b">
-              <th className="text-left px-4 py-3 font-medium text-gray-900">ID</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-900">Title</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-900">Trainer</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-900">Price</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-900">Level</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-900">Active</th>
-              <th className="text-left px-4 py-3 font-medium text-gray-900">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedCourses.length > 0 ? (
-              paginatedCourses.map((course) => (
-                <tr key={course.course_id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-900">{course.course_id}</td>
-                  <td className="px-4 py-3 text-gray-900">{course.title}</td>
-                  <td className="px-4 py-3 text-gray-600">{course.trainer?.trainer_name || 'N/A'}</td>
-                  <td className="px-4 py-3 text-gray-900">${course.price}</td>
-                  <td className="px-4 py-3 text-gray-600 capitalize">{course.level}</td>
-                  <td className="px-4 py-3">
-                    <span className={`px-2 py-1 text-xs rounded-full ${course.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                      {course.is_active ? 'Active' : 'Inactive'}
-                    </span>
+      <div className="overflow-x-auto bg-white rounded-lg shadow p-4 md:p-6 lg:p-8">
+        {/* Desktop Table View - Hidden on mobile */}
+        <div className="hidden md:block">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b">
+                <th className="text-left px-2 md:px-4 py-3 font-medium text-gray-900 text-sm md:text-base">ID</th>
+                <th className="text-left px-2 md:px-4 py-3 font-medium text-gray-900 text-sm md:text-base">Title</th>
+                <th className="text-left px-2 md:px-4 py-3 font-medium text-gray-900 text-sm md:text-base hidden lg:table-cell">Trainer</th>
+                <th className="text-left px-2 md:px-4 py-3 font-medium text-gray-900 text-sm md:text-base">Price</th>
+                <th className="text-left px-2 md:px-4 py-3 font-medium text-gray-900 text-sm md:text-base hidden lg:table-cell">Level</th>
+                <th className="text-left px-2 md:px-4 py-3 font-medium text-gray-900 text-sm md:text-base">Active</th>
+                <th className="text-left px-2 md:px-4 py-3 font-medium text-gray-900 text-sm md:text-base">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedCourses.length > 0 ? (
+                paginatedCourses.map((course) => (
+                  <tr key={course.course_id} className="border-b hover:bg-gray-50">
+                    <td className="px-2 md:px-4 py-3 text-gray-900 text-sm md:text-base">{course.course_id}</td>
+                    <td className="px-2 md:px-4 py-3 text-gray-900 text-sm md:text-base">
+                      <div>
+                        <div>{course.title}</div>
+                        <div className="lg:hidden text-xs text-gray-500 mt-1">
+                          {course.trainer?.trainer_name || 'N/A'} • {course.level}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-2 md:px-4 py-3 text-gray-600 text-sm md:text-base hidden lg:table-cell">{course.trainer?.trainer_name || 'N/A'}</td>
+                    <td className="px-2 md:px-4 py-3 text-gray-900 text-sm md:text-base font-medium">${course.price}</td>
+                    <td className="px-2 md:px-4 py-3 text-gray-600 capitalize text-sm md:text-base hidden lg:table-cell">{course.level}</td>
+                    <td className="px-2 md:px-4 py-3">
+                      <span className={`px-2 py-1 text-xs rounded-full ${course.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                        {course.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-2 md:px-4 py-3">
+                      <div className="flex gap-1 md:gap-2">
+                        <button
+                          onClick={() => handleEdit(course)}
+                          className="text-blue-600 hover:text-blue-800 p-1"
+                          title="Edit course"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(course.course_id)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                          title="Delete course"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="px-4 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center text-gray-500">
+                      <div className="text-4xl md:text-6xl mb-4">📚</div>
+                      <h3 className="text-lg font-medium mb-2">No courses found</h3>
+                      <p className="text-sm mb-4 max-w-md">
+                        {searchTerm
+                          ? `No courses match "${searchTerm}". Try a different search term.`
+                          : 'Get started by adding your first course.'
+                        }
+                      </p>
+                      {!searchTerm && (
+                        <button
+                          onClick={handleAddNew}
+                          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <Plus size={16} /> Add Your First Course
+                        </button>
+                      )}
+                    </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="block md:hidden">
+          {paginatedCourses.length > 0 ? (
+            <div className="space-y-4">
+              {paginatedCourses.map((course) => (
+                <div key={course.course_id} className="bg-gray-50 rounded-lg p-4 border">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900 mb-1">{course.title}</h3>
+                      <p className="text-sm text-gray-500">ID: {course.course_id}</p>
+                    </div>
+                    <div className="flex gap-2 ml-4">
                       <button
                         onClick={() => handleEdit(course)}
-                        className="text-blue-600 hover:text-blue-800 p-1"
+                        className="text-blue-600 hover:text-blue-800 p-2 bg-white rounded-lg shadow-sm"
                         title="Edit course"
                       >
                         <Edit size={16} />
                       </button>
                       <button
                         onClick={() => handleDelete(course.course_id)}
-                        className="text-red-600 hover:text-red-800 p-1"
+                        className="text-red-600 hover:text-red-800 p-2 bg-white rounded-lg shadow-sm"
                         title="Delete course"
                       >
                         <Trash2 size={16} />
                       </button>
                     </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="px-4 py-12 text-center">
-                  <div className="flex flex-col items-center justify-center text-gray-500">
-                    <div className="text-6xl mb-4">📚</div>
-                    <h3 className="text-lg font-medium mb-2">No courses found</h3>
-                    <p className="text-sm mb-4">
-                      {searchTerm
-                        ? `No courses match "${searchTerm}". Try a different search term.`
-                        : 'Get started by adding your first course.'
-                      }
-                    </p>
-                    {!searchTerm && (
-                      <button
-                        onClick={handleAddNew}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        <Plus size={16} /> Add Your First Course
-                      </button>
-                    )}
                   </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Trainer</p>
+                      <p className="text-sm text-gray-900">{course.trainer?.trainer_name || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Price</p>
+                      <p className="text-sm font-medium text-gray-900">${course.price}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Level</p>
+                      <p className="text-sm text-gray-900 capitalize">{course.level}</p>
+                    </div>
+                    <span className={`px-3 py-1 text-xs rounded-full font-medium ${course.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                      {course.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-gray-500 py-12">
+              <div className="text-6xl mb-4">📚</div>
+              <h3 className="text-lg font-medium mb-2">No courses found</h3>
+              <p className="text-sm mb-4 text-center px-4">
+                {searchTerm
+                  ? `No courses match "${searchTerm}". Try a different search term.`
+                  : 'Get started by adding your first course.'
+                }
+              </p>
+              {!searchTerm && (
+                <button
+                  onClick={handleAddNew}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Plus size={16} /> Add Your First Course
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Pagination would go here if needed */}

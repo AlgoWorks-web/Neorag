@@ -81,147 +81,35 @@ const EnrolledStudents = () => {
     }
   };
 
-  // const downloadAgreement = async (enrollmentId) => {
-  //   try {
-  //     const response = await axios.get(`${API_BASE_URL}/download-agreement/${enrollmentId}`, {
-  //       headers: {
-  //         'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //       },
-  //       responseType: 'blob',
-  //     });
 
-  //     // Create blob URL and download
-  //     const blob = new Blob([response.data], { type: 'application/pdf' });
-  //     const url = window.URL.createObjectURL(blob);
-  //     const link = document.createElement('a');
-  //     link.href = url;
-  //     link.setAttribute('download', `agreement_${enrollmentId}.pdf`);
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     link.remove();
-  //     window.URL.revokeObjectURL(url);
-
-  //   } catch (error) {
-  //     console.error('Download failed:', error);
-
-  //     if (error.response) {
-  //       console.log('Server error:', error.response.status, error.response.data);
-  //       alert(`Failed to download agreement: ${error.response.status} - ${error.response.statusText}`);
-  //     } else if (error.request) {
-  //       console.log('Network error:', error.request);
-  //       alert('Network error: Unable to connect to server');
-  //     } else {
-  //       alert('Failed to download agreement');
-  //     }
-  //   }
-  // };
-
-  // Enhanced view function that handles both base64 and file paths
-  // const viewAgreement = async (enrollment) => {
-  //   try {
-  //     const agreementData = enrollment.useragreement;
-
-  //     if (!agreementData) {
-  //       alert('No agreement data available');
-  //       return;
-  //     }
-
-  //     let blob;
-
-  //     // Check if it's base64 data
-  //     if (isBase64Data(agreementData)) {
-  //       console.log('Processing base64 PDF data');
-  //       blob = createBlobFromBase64(agreementData);
-
-  //       if (!blob) {
-  //         alert('Failed to process PDF data');
-  //         return;
-  //       }
-  //     } else {
-  //       // It's a file path, try to fetch via API
-  //       console.log('Fetching PDF via API for enrollment:', enrollment.enrollment_id);
-
-  //       const response = await axios.get(`${API_BASE_URL}/enrollments/${enrollment.enrollment_id}/agreement`, {
-  //         headers: {
-  //           'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  //         },
-  //         responseType: 'blob',
-  //       });
-
-  //       // Check if response is actually a PDF
-  //       const contentType = response.headers['content-type'];
-  //       if (!contentType || !contentType.includes('application/pdf')) {
-  //         console.error('Response is not a PDF:', contentType);
-  //         alert('The file is not a valid PDF document');
-  //         return;
-  //       }
-
-  //       blob = new Blob([response.data], { type: 'application/pdf' });
-  //     }
-
-  //     // Create URL and open PDF
-  //     const fileURL = window.URL.createObjectURL(blob);
-
-  //     // Open in new tab
-  //     const newWindow = window.open(fileURL, '_blank');
-  //     if (!newWindow) {
-  //       // If popup blocked, try alternative method
-  //       const link = document.createElement('a');
-  //       link.href = fileURL;
-  //       link.target = '_blank';
-  //       link.click();
-  //     }
-
-  //     // Clean up the URL after a delay
-  //     setTimeout(() => {
-  //       window.URL.revokeObjectURL(fileURL);
-  //     }, 5000);
-
-  //   } catch (error) {
-  //     console.error('Failed to open agreement PDF:', error);
-
-  //     if (error.response?.status === 404) {
-  //       alert('Agreement not found. Please contact support.');
-  //     } else if (error.response?.status === 403) {
-  //       alert('Access denied. You may not have permission to view this agreement.');
-  //     } else if (error.response) {
-  //       console.log('Server error:', error.response.status, error.response.data);
-  //       alert(`Failed to open agreement: ${error.response.status} - ${error.response.statusText}`);
-  //     } else if (error.request) {
-  //       alert('Network error: Unable to connect to server');
-  //     } else {
-  //       alert('Failed to open the agreement');
-  //     }
-  //   }
-  // };
 
   const viewAgreement = (enrollment) => {
-  const agreementData = enrollment.useragreement;
+    const agreementData = enrollment.useragreement;
 
-  if (!agreementData) {
-    alert('No agreement data available');
-    return;
-  }
-
-  // If it's base64, handle with blob
-  if (isBase64Data(agreementData)) {
-    console.log('Viewing base64 PDF...');
-    const blob = createBlobFromBase64(agreementData);
-    if (!blob) {
-      alert('Failed to process base64 agreement data');
+    if (!agreementData) {
+      alert('No agreement data available');
       return;
     }
 
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-  } else {
-    console.log('Opening direct file path PDF...');
-    const cleanPath = agreementData.replace(/^storage\//, '');
-    const url = `${STORAGE_BASE_URL}/${cleanPath}`;
-    window.open(url, '_blank');
-  }
-};
+    // If it's base64, handle with blob
+    if (isBase64Data(agreementData)) {
+      console.log('Viewing base64 PDF...');
+      const blob = createBlobFromBase64(agreementData);
+      if (!blob) {
+        alert('Failed to process base64 agreement data');
+        return;
+      }
+
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    } else {
+      console.log('Opening direct file path PDF...');
+      const cleanPath = agreementData.replace(/^storage\//, '');
+      const url = `${STORAGE_BASE_URL}/${cleanPath}`;
+      window.open(url, '_blank');
+    }
+  };
 
 
   // Alternative download function for base64 data
@@ -304,89 +192,6 @@ const EnrolledStudents = () => {
         </button>
       </div>
 
-      {students.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500 text-lg">No enrolled students found</p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto shadow-lg rounded-lg">
-          <table className="min-w-full bg-white border border-gray-200">
-            <thead className="bg-indigo-600 text-white">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">Student Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">Course Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">Progress</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">Agreement</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Enrolled Date</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {students.map((enroll) => (
-                <tr key={enroll.enrollment_id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200">{enroll.enrollment_id}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200">{enroll.student?.username || enroll.student?.name || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200">{enroll.course?.title || 'N/A'}</td>
-                  <td className="px-6 py-4 text-sm border-r border-gray-200">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${enroll.status === 'enrolled' ? 'bg-green-100 text-green-800' :
-                      enroll.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                        enroll.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                      }`}>
-                      {enroll.status || 'Pending'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200">
-                    <div className="flex items-center">
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${enroll.progress || 0}%` }}></div>
-                      </div>
-                      <span className="ml-2 text-sm">{enroll.progress || 0}%</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm border-r border-gray-200">
-                    {enroll.useragreement ? (
-                      <div className="flex flex-col space-y-1">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => viewAgreement(enroll)}
-                            className="text-blue-600 hover:text-blue-800 underline font-medium text-xs"
-                          >
-                            View
-                          </button>
-                          {/* {isBase64Data(enroll.useragreement) ? (
-                            <button
-                              onClick={() => downloadAgreementDirect(enroll)}
-                              className="text-green-600 hover:text-green-800 underline font-medium text-xs"
-                            >
-                              Download (Direct)
-                            </button>
-                          ) : (
-                            // <button
-                            //   onClick={() => downloadAgreement(enroll.enrollment_id)}
-                            //   className="text-green-600 hover:text-green-800 underline font-medium text-xs"
-                            // >
-                            //   Download (API)
-                            // </button>
-                          )} */}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {isBase64Data(enroll.useragreement) ? 'Base64 Data' : 'File Path'}
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400">No Agreement</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{new Date(enroll.enrollment_date).toLocaleDateString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
       <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-blue-100 p-4 rounded-lg">
           <h3 className="text-lg font-semibold text-blue-800">Total Students</h3>
@@ -405,6 +210,111 @@ const EnrolledStudents = () => {
           <p className="text-2xl font-bold text-purple-600">{students.filter(s => s.status === 'completed').length}</p>
         </div>
       </div>
+
+
+      {students.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500 text-lg">No enrolled students found</p>
+        </div>
+      ) : (
+        <>
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto shadow-lg rounded-lg mt-10">
+            <table className="min-w-full bg-white border border-gray-200">
+              <thead className="bg-indigo-600 text-white">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">Student Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">Course Title</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">Status</th>
+                
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider border-r border-indigo-500">Agreement</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Enrolled Date</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {students.map((enroll) => (
+                  <tr key={enroll.enrollment_id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200">{enroll.enrollment_id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200">{enroll.student?.username || enroll.student?.name || 'N/A'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200">{enroll.course?.title || 'N/A'}</td>
+                    <td className="px-6 py-4 text-sm border-r border-gray-200">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${enroll.status === 'enrolled' ? 'bg-green-100 text-green-800' :
+                        enroll.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                          enroll.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                        }`}>
+                        {enroll.status || 'Pending'}
+                      </span>
+                    </td>
+                   
+                    <td className="px-6 py-4 text-sm border-r border-gray-200">
+                      {enroll.useragreement ? (
+                        <div className="flex flex-col space-y-1">
+                          <button
+                            onClick={() => viewAgreement(enroll)}
+                            className="text-blue-600 hover:text-blue-800 underline mr-10 text-xs"
+                          >
+                            View
+                          </button>
+                          <div className="text-xs font-medium ml-16 text-gray-500">
+                            {isBase64Data(enroll.useragreement) ? 'Base64 Data' : 'File Path'}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">No Agreement</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">{new Date(enroll.enrollment_date).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4 mt-10">
+            {students.map((enroll) => (
+              <div
+                key={enroll.enrollment_id}
+                className="bg-white border border-gray-200 rounded-lg shadow p-4"
+              >
+                <p className="text-sm"><strong>ID:</strong> {enroll.enrollment_id}</p>
+                <p className="text-sm"><strong>Name:</strong> {enroll.student?.username || enroll.student?.name || 'N/A'}</p>
+                <p className="text-sm"><strong>Course:</strong> {enroll.course?.title || 'N/A'}</p>
+                <p className="text-sm">
+                  <strong>Status:</strong>{' '}
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${enroll.status === 'enrolled' ? 'bg-green-100 text-green-800' :
+                    enroll.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                      enroll.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                    }`}>
+                    {enroll.status || 'Pending'}
+                  </span>
+                </p>
+               
+                <div className="mt-2">
+                  <strong>Agreement:</strong>{' '}
+                  {enroll.useragreement ? (
+                    <button
+                      onClick={() => viewAgreement(enroll)}
+                      className="ml-1 text-blue-600 hover:text-blue-800 underline text-xs font-medium"
+                    >
+                      View
+                    </button>
+                  ) : (
+                    <span className="ml-1 text-gray-400">No Agreement</span>
+                  )}
+                </div>
+                <p className="text-sm mt-2"><strong>Date:</strong> {new Date(enroll.enrollment_date).toLocaleDateString()}</p>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+
+
     </div>
   );
 };

@@ -39,11 +39,11 @@ const TrainerSidebar = ({ sidebarOpen, toggleSidebar }) => {
           onClick={toggleSidebar}
         >
           <FaBook />
-          <span>Training Info</span>
+          <span>Class Schedule</span>
         </NavLink>
 
 
-        <NavLink 
+        {/* <NavLink 
           to="uploadCourses" 
           className={({isActive}) => 
             `flex items-center space-x-2 py-2 px-4 rounded transition duration-200 ${
@@ -54,7 +54,7 @@ const TrainerSidebar = ({ sidebarOpen, toggleSidebar }) => {
         >
           <FaBook />
           <span>Upload New Courses</span>
-        </NavLink>
+        </NavLink> */}
         
         <NavLink 
           to="/trainer/materials" 
@@ -95,7 +95,7 @@ const TrainerSidebar = ({ sidebarOpen, toggleSidebar }) => {
           <span>Profile</span>
         </NavLink>
         
-        <NavLink 
+        {/* <NavLink 
           to="/settings" 
           className={({isActive}) => 
             `flex items-center space-x-2 py-2 px-4 rounded transition duration-200 ${
@@ -106,7 +106,7 @@ const TrainerSidebar = ({ sidebarOpen, toggleSidebar }) => {
         >
           <FaCog />
           <span>Settings</span>
-        </NavLink>
+        </NavLink> */}
       </nav>
     </div>
   );

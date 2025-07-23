@@ -282,29 +282,29 @@ function AdminTrainers() {
 
   return (
     <div className="p-4">
-   <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
-  <h2 className="text-2xl font-bold text-center md:text-left">TRAINERS MANAGEMENT</h2>
-  
-  <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
-    <div className="relative w-full sm:w-auto">
-      <input
-        type="text"
-        placeholder="Search trainers..."
-        className="pl-10 pr-4 py-2 border rounded-lg w-full sm:w-64"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-      <FaSearch className="absolute left-3 top-3 text-gray-400" />
-    </div>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+        <h2 className="text-2xl font-bold text-center md:text-left">TRAINERS MANAGEMENT</h2>
 
-    <button
-      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center"
-      onClick={() => setShowForm(true)}
-    >
-      <FaUserPlus className="mr-2" /> Onboard Trainer
-    </button>
-  </div>
-</div>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="text"
+              placeholder="Search trainers..."
+              className="pl-10 pr-4 py-2 border rounded-lg w-full sm:w-64"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FaSearch className="absolute left-3 top-3 text-gray-400" />
+          </div>
+
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center"
+            onClick={() => setShowForm(true)}
+          >
+            <FaUserPlus className="mr-2" /> Onboard Trainer
+          </button>
+        </div>
+      </div>
 
 
       {/* Trainers List */}
@@ -338,7 +338,7 @@ function AdminTrainers() {
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="overflow-x-auto sm:overflow-visible">
+          <div className="hidden md:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -527,8 +527,105 @@ function AdminTrainers() {
               </div>
             </div>
           )}
+
+
         </div>
       )}
+
+      <div className="md:hidden space-y-4 px-4 py-2">
+        {filteredTrainers.length === 0 ? (
+          <div className="text-center text-gray-500">
+            {trainers.length === 0 ? 'No trainers found' : 'No trainers match your search'}
+          </div>
+        ) : (
+          filteredTrainers.map((trainer, index) => (
+            <div
+              key={trainer.id || trainer.email || index}
+              className="bg-white rounded-lg shadow border border-gray-200 p-4 space-y-3"
+            >
+              <div className="flex items-center space-x-3">
+                <div className="h-12 w-12 relative">
+                  {trainer.profile_pic || trainer.profilePic ? (
+                    <img
+                      src={trainer.profile_pic || trainer.profilePic}
+                      alt={trainer.name || trainer.trainer_name || 'Trainer'}
+                      className="h-12 w-12 rounded-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div
+                    className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center absolute top-0 left-0"
+                    style={{ display: trainer.profile_pic || trainer.profilePic ? 'none' : 'flex' }}
+                  >
+                    <FaUser className="text-gray-500" />
+                  </div>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900 text-sm">
+                    {trainer.name || trainer.trainer_name || trainer.trainerName || 'N/A'}
+                  </p>
+                  {trainer.bio && (
+                    <p className="text-xs text-gray-500 truncate">{trainer.bio}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-sm">
+                <p className="flex items-center text-gray-700">
+                  <FaEnvelope className="mr-2 text-gray-400" />
+                  {trainer.email || 'N/A'}
+                </p>
+                {trainer.phone_number && (
+                  <p className="flex items-center text-gray-700 mt-1">
+                    <FaPhone className="mr-2 text-gray-400" />
+                    {trainer.phone_number}
+                  </p>
+                )}
+              </div>
+
+              <div className="text-sm text-gray-700">
+                <strong>Expertise:</strong> {trainer.expertise || 'N/A'}
+              </div>
+
+              <div className="text-sm text-gray-700 flex items-center">
+                <FaMapMarkerAlt className="mr-2 text-gray-400" />
+                {trainer.location || 'N/A'}
+              </div>
+
+              <div className="flex justify-end space-x-4 text-sm">
+                <button
+                  className="text-indigo-600 hover:text-indigo-900"
+                  onClick={() => {
+                    setFormData({
+                      trainerName: trainer.trainer_name || '',
+                      email: trainer.email || '',
+                      profilePic: null,
+                      bio: trainer.bio || '',
+                      expertise: trainer.expertise || '',
+                      location: trainer.location || '',
+                      phone_number: trainer.phone_number || '',
+                    });
+                    setEditTrainerId(trainer.trainer_id);
+                    setShowForm(true);
+                  }}
+                >
+                  <FaEdit />
+                </button>
+
+                <button
+                  className="text-red-600 hover:text-red-900"
+                  onClick={() => handleDelete(trainer.trainer_id)}
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
 
       {/* Modal form */}
       {showForm && (
