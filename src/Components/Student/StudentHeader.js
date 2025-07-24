@@ -13,7 +13,7 @@ const StudentHeader = ({ toggleSidebar }) => {
     if (studentUser && studentUser.id) {
       axios
         // .get(`http://localhost:8000/api/student/${studentUser.id}`)
-        .get(`http://hydersoft.com/api/student/${studentUser.id}`)
+        .get(`https://hydersoft.com/api/student/${studentUser.id}`)
         .then(res => {
           setUsername(res.data.username);
         })
