@@ -35,6 +35,9 @@ import AdminCourses from "./Components/Admin/AdminCourses";
 import AdminPlans from "./Components/Admin/AdminPlans";
 import AdminSettings from "./Components/Admin/AdminSettings";
 import AdminReports from "./Components/Admin/AdminReports";
+import ContactInfo from "./Components/Admin/ContactInfo";
+import AppointmentInfo from "./Components/Admin/AppointmentInfo";
+
 
 // Trainer components
 import TrainerDashboard from "./pages/TrainerDashboard"; // Main dashboard layout
@@ -67,6 +70,8 @@ import EnrolledStudents from "./Components/Admin/EnrolledStudents";
 import Agreements from "./Components/Admin/Agreements";
 import PublicCourses from "./Components/PublicCourses";
 import PublicCourseDetails from "./Components/PublicCourseDetails";
+
+
 
 
 const AppContent = () => {
@@ -128,6 +133,8 @@ const AppContent = () => {
           <Route path="reports" element={<AdminReports />} />
           <Route path="students-enrolled" element={<EnrolledStudents/>}/>
           <Route path="agreements" element={<Agreements/>}/>
+          <Route path="contactinfo" element={<ContactInfo/>}/>
+          <Route path="appointmentinfo" element={<AppointmentInfo/>}/>
         </Route>
 
         {/* Trainer Routes - Updated to match your component structure */}
