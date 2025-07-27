@@ -5,7 +5,7 @@ function ContactInfo() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('https://hydersoft.com/contact/all')
+    fetch('https://hydersoft.com/api/contact/all')
       .then(res => res.json())
       .then(data => {
         if (data.statusCode === 200) {

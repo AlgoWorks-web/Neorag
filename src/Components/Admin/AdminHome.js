@@ -15,10 +15,10 @@ const AdminHome = () => {
       </header>
 
       <StatsCards />
-      <RegionsFeeds />
+      {/* <RegionsFeeds />
       <GeneralStats />
       <CountriesTable />
-      <RecentUsers />
+      <RecentUsers /> */}
     </div>
   );
 }

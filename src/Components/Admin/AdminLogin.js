@@ -14,20 +14,26 @@ const AdminLogin = () => {
     setLoading(true);
     setError('');
 
-    // Basic validation
     if (!email.trim() || !password.trim()) {
       setError('Please enter both email and password');
       setLoading(false);
       return;
     }
 
-    // Hardcoded credentials
     const hardcodedEmail = 'admin@neorag.com';
     const hardcodedPassword = 'King@5432#';
 
-    // Check if entered credentials match
     if (email === hardcodedEmail && password === hardcodedPassword) {
+      const adminUser = {
+        email,
+        role: 'admin',
+        name: 'Admin User', // Optional static name or fetched from API
+      };
+
+      // Store mock token and user info
       localStorage.setItem('adminToken', 'mock-admin-token');
+      localStorage.setItem('adminUser', JSON.stringify(adminUser));
+
       navigate('/admin-home');
     } else {
       setError('Invalid email or password');
@@ -35,6 +41,7 @@ const AdminLogin = () => {
 
     setLoading(false);
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -82,9 +89,8 @@ const AdminLogin = () => {
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className={`w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition ${
-              loading ? 'opacity-70 cursor-not-allowed' : ''
-            } ${!email || !password ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition ${loading ? 'opacity-70 cursor-not-allowed' : ''
+              } ${!email || !password ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>

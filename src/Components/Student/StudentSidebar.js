@@ -35,7 +35,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
           <span>Dashboard</span>
         </NavLink>
 
-        <NavLink 
+        {/* <NavLink 
           to="courses" 
           className={({isActive}) => 
             `flex items-center space-x-3 py-3 px-4 rounded-lg transition duration-200 ${
@@ -46,7 +46,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
         >
           <FaBook className="text-lg" />
           <span>Courses</span>
-        </NavLink>
+        </NavLink> */}
         
         <NavLink 
           to="mycourses" 
@@ -101,7 +101,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
           <span>Class Schedule</span>
         </NavLink>
         
-        <NavLink 
+        {/* <NavLink 
           to="studentprofile" 
           className={({isActive}) => 
             `flex items-center space-x-3 py-3 px-4 rounded-lg transition duration-200 ${
@@ -112,7 +112,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
         >
           <FaUser className="text-lg" />
           <span>Profile</span>
-        </NavLink>
+        </NavLink> */}
       </nav>
       
       <div className="px-4 pt-10 border-t border-indigo-700">

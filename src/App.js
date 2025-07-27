@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
 // Main website components
 import HomePage from './Components/HomePage';
@@ -23,69 +23,82 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // User Dashboard components
-
 import Settings from "./Components/UserDashboard/Settings";
 
 // Admin components
 import AdminDashboard from "./Components/Admin/AdminDashboard";
 import AdminLogin from "./Components/Admin/AdminLogin";
 import AdminHome from "./Components/Admin/AdminHome";
-
 import AdminCourses from "./Components/Admin/AdminCourses";
 import AdminPlans from "./Components/Admin/AdminPlans";
 import AdminSettings from "./Components/Admin/AdminSettings";
 import AdminReports from "./Components/Admin/AdminReports";
 import ContactInfo from "./Components/Admin/ContactInfo";
 import AppointmentInfo from "./Components/Admin/AppointmentInfo";
-
+import AdminTrainers from "./Components/Admin/AdminTrainers";
+import AdminStudents from "./Components/Admin/AdminStudents";
+import EnrolledStudents from "./Components/Admin/EnrolledStudents";
+import Agreements from "./Components/Admin/Agreements";
 
 // Trainer components
-import TrainerDashboard from "./pages/TrainerDashboard"; // Main dashboard layout
+import TrainerDashboard from "./pages/TrainerDashboard";
 import TrainerLogin from "./pages/TrainerLogin";
-import TrainerHome from "./Components/Trainer/TrainerHome"; // Updated path
-import TrainerProfile from "./Components/Trainer/TrainerProfile"; // Updated path
-import TrainingInfo from "./Components/Trainer/TrainingInfo"; // Updated path
-import TrainingMaterials from "./Components/Trainer/TrainingMaterials"; // Updated path
-import VideoUploader from "./Components/Trainer/VideoUploader"; // Updated path
+import TrainerHome from "./Components/Trainer/TrainerHome";
+import TrainerProfile from "./Components/Trainer/TrainerProfile";
+import TrainingInfo from "./Components/Trainer/TrainingInfo";
+import TrainingMaterials from "./Components/Trainer/TrainingMaterials";
+import VideoUploader from "./Components/Trainer/VideoUploader";
 
-//Student
+// Student
 import StudentDashboard from "./pages/StudentDashboard";
 import StudentLogin from "./pages/StudentLogin";
 import StudentHome from "./Components/Student/StudentHome";
-
 import CourseDetail from "./Components/Student/CourseDetail";
 import MaterialsList from "./Components/Student/MaterialsList";
 import VideoLectures from "./Components/Student/VideoLectures";
 import ScheduleView from "./Components/Student/ScheduleView";
-import AdminUsers from "./Components/Admin/AdminStudents";
-import AdminTrainers from "./Components/Admin/AdminTrainers";
-import AdminStudents from "./Components/Admin/AdminStudents";
 import StudentProfile from "./Components/Student/StudentProfile";
 import Courses from "./Components/Student/Courses";
 import StudentMyCourses from "./Components/Student/StudentMyCourses";
 import PaymentSuccess from "./Components/PaymentSuccess";
 import PricingPlans from "./Components/PricingPlans";
 import AllCoursestogether from "./Components/Student/AllCoursestogether";
-import EnrolledStudents from "./Components/Admin/EnrolledStudents";
-import Agreements from "./Components/Admin/Agreements";
 import PublicCourses from "./Components/PublicCourses";
 import PublicCourseDetails from "./Components/PublicCourseDetails";
+import PrivateRoute from '../src/auth/PrivateRoute';
+
+// 404 component
+import NotFound from './Components/NotFound';
 
 
-
-
-const AppContent = () => {
+function AppContent() {
   const location = useLocation();
-  const hideNavAndFooter =
+
+  // Match only for your defined public routes
+  const publicRoutePrefixes = [
+    "/", "/services", "/contact", "/login", "/signup", "/about", "/pricing",
+    "/case-studies", "/business", "/terms", "/sla", "/privacy", "/publiccourses",
+    "/forgot-password", "/book-appointment", "/pricingplans", "/Allcourses",
+    "/public-course-details/"
+  ];
+
+  // If on a dashboard/admin/trainer/student route OR on NotFound = hide Navbar/Footer
+  const isDashboard =
     location.pathname.startsWith("/user-dashboard") ||
     location.pathname.startsWith("/admin") ||
     location.pathname.startsWith("/trainer") ||
-    location.pathname.startsWith("/student") ||
-    ["/login", "/signup", "/forgot-password"].includes(location.pathname);
+    location.pathname.startsWith("/student");
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  // Detect whether to show Nav/Footer
+  // Nav/Footer HIDDEN on:
+  // - Dashboard, admin, trainer, student areas
+  // - Login, signup, forgot-password
+  // - Any 404 page (i.e. route does not match allowed public prefixes)
+  const isPublicPage = publicRoutePrefixes.some(
+    prefix => location.pathname === prefix || location.pathname.startsWith(prefix + "/")
+  );
+  const isAuthPage = ["/login", "/signup", "/forgot-password"].includes(location.pathname);
+  const hideNavAndFooter = isDashboard || isAuthPage || !isPublicPage;
 
   return (
     <>
@@ -105,25 +118,20 @@ const AppContent = () => {
         <Route path="/terms" element={<Termstouse />} />
         <Route path="/sla" element={<Sla />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/publiccourses" element={<PublicCourses/>}/>
+        <Route path="/publiccourses" element={<PublicCourses />} />
         <Route path="/public-course-details/:courseId" element={<PublicCourseDetails />} />
-         
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/book-appointment" element={<AppointmentForm />} />
-        <Route path="/pricingplans" element={<PricingPlans/>}/>
-        <Route path="/Allcourses" element={<AllCoursestogether/>}/>   
-        {/* User Dashboard Routes */}
-        {/* <Route path="/user-dashboard" element={<UserDashboard />}>
-          <Route path="home" element={<Myhome />} />
-          <Route path="courses" element={<Courses />} />
-          <Route path="mycourse" element={<MyCourses />} />
-          <Route path="pricing" element={<Pricing minimal={true} />} />
-          <Route path="Settings" element={<Settings />} />
-        </Route> */}
+        <Route path="/pricingplans" element={<PricingPlans />} />
+        <Route path="/Allcourses" element={<AllCoursestogether />} />
 
         {/* Admin Routes */}
         <Route path="/supremehandling" element={<AdminLogin />} />
-        <Route path="/admin-home" element={<AdminDashboard />}>
+        <Route path="/admin-home" element={
+          <PrivateRoute role="admin">
+            <AdminDashboard />
+          </PrivateRoute>
+        } >
           <Route index element={<AdminHome />} />
           <Route path="adminstudents" element={<AdminStudents />} />
           <Route path="adminstrainers" element={<AdminTrainers />} />
@@ -131,28 +139,34 @@ const AppContent = () => {
           <Route path="plans" element={<AdminPlans />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="reports" element={<AdminReports />} />
-          <Route path="students-enrolled" element={<EnrolledStudents/>}/>
-          <Route path="agreements" element={<Agreements/>}/>
-          <Route path="contactinfo" element={<ContactInfo/>}/>
-          <Route path="appointmentinfo" element={<AppointmentInfo/>}/>
+          <Route path="students-enrolled" element={<EnrolledStudents />} />
+          <Route path="agreements" element={<Agreements />} />
+          <Route path="contactinfo" element={<ContactInfo />} />
+          <Route path="appointmentinfo" element={<AppointmentInfo />} />
         </Route>
 
-        {/* Trainer Routes - Updated to match your component structure */}
+        {/* Trainer Routes */}
         <Route path="/trainer-login" element={<TrainerLogin />} />
-        <Route path="/trainer" element={<TrainerDashboard />}>
+        <Route path="/trainer" element={
+          <PrivateRoute role="trainer">
+            <TrainerDashboard />
+          </PrivateRoute>
+        } >
           <Route index element={<TrainerHome />} />
           <Route path="training-info" element={<TrainingInfo />} />
-          {/* <Route path="uploadCourses" element={<UploadNewCourses />} /> */}
           <Route path="materials" element={<TrainingMaterials />} />
           <Route path="videos" element={<VideoUploader />} />
           <Route path="profile" element={<TrainerProfile />} />
-          <Route path="settings" element={<Settings />} /> {/* Use existing Settings component */}
+          <Route path="settings" element={<Settings />} />
         </Route>
-
 
         {/* Student Routes */}
         <Route path="/student-login" element={<StudentLogin />} />
-        <Route path="/student" element={<StudentDashboard />}>
+        <Route path="/student" element={
+          <PrivateRoute role="student">
+            <StudentDashboard />
+          </PrivateRoute>
+        } >
           <Route index element={<StudentHome />} />
           <Route path="courses" element={<PricingPlans />} />
           <Route path="mycourses" element={<StudentMyCourses />} />
@@ -162,30 +176,24 @@ const AppContent = () => {
           <Route path="studentprofile" element={<StudentProfile />} />
           <Route path="course-details/:courseId" element={<CourseDetail />} />
           <Route path="useragreement/:courseId" element={<Useragreement />} />
-                
-       
         </Route>
-         <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
 
+        {/* CATCH-ALL 404 ROUTE --- always LAST */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
-      {!hideNavAndFooter && (
-        <>
-          <Footer />
-        </>
-      )}
+      {!hideNavAndFooter && <Footer />}
     </>
   );
-};
+}
 
 function App() {
   return (
     <Router>
       <AppContent />
       <ToastContainer position="top-center" autoClose={3000} />
-      
     </Router>
   );
 }
-
 export default App;

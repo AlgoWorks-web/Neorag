@@ -66,6 +66,7 @@ const Login = () => {
           };
 
       const response = await axios.post(endpoint, payload);
+      
 
       if (response.data.success) {
         console.log("=== LOGIN RESPONSE ===", response.data);
@@ -73,7 +74,7 @@ const Login = () => {
 
         // Now the backend returns complete trainer data including trainer_id
         localStorage.setItem(
-          role === "student" ? "studentUser" : "trainerUser",
+          role === "student" ? "studentUser" : "trainerUser" ,
           JSON.stringify(response.data.user)
         );
 
