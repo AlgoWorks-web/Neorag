@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
 function VideoUploader() {
   const [courses, setCourses] = useState([]);
@@ -16,12 +15,13 @@ function VideoUploader() {
   const [loading, setLoading] = useState(false);
   const [editingVideo, setEditingVideo] = useState(null);
 
-  // Fetch courses
+  // Fetch courses (your original code)
   useEffect(() => {
-    axios.get('https://hydersoft.com/api/courses/getcourse')
-      .then(response => {
-        console.log('Courses fetched:', response.data);
-        setCourses(response.data);
+    fetch('https://hydersoft.com/api/courses/getcourse')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Courses fetched:', data);
+        setCourses(data);
       })
       .catch(error => {
         console.error('Error fetching courses:', error);
@@ -37,19 +37,35 @@ function VideoUploader() {
     }
   }, [courseId]);
 
-  // Fetch videos
+  // Fixed fetch videos function (your original code with the fix)
   const fetchVideos = async () => {
     if (!courseId) return;
 
     setLoading(true);
     try {
       console.log(`Fetching videos for course: ${courseId}`);
-      const response = await axios.get(`https://hydersoft.com/api/trainer/courses/${courseId}/videos`);
-      console.log('Videos fetched:', response.data);
-      setVideos(Array.isArray(response.data) ? response.data : []);
+      const response = await fetch(`https://hydersoft.com/api/trainer/courses/${courseId}/videos`);
+      const data = await response.json();
+      
+      console.log('Full API response:', data);
+      
+      // Fix: Access the nested data array
+      let videoData = [];
+      if (data && data.success && Array.isArray(data.data)) {
+        videoData = data.data;
+      } else if (Array.isArray(data)) {
+        // Fallback for direct array response
+        videoData = data;
+      }
+      
+      console.log('Processed videos:', videoData);
+      setVideos(videoData);
+      
     } catch (error) {
       console.error('Error fetching videos:', error);
       setVideos([]);
+      setUploadMessage(`Failed to fetch videos: ${error.message}`);
+      setTimeout(() => setUploadMessage(''), 5000);
     } finally {
       setLoading(false);
     }
@@ -81,22 +97,34 @@ function VideoUploader() {
     setUploading(true);
     try {
       let response;
+      
       if (editingVideo) {
-        response = await axios.post(`https://hydersoft.com/api/trainer/updatevideos/${editingVideo.video_id || editingVideo.id}`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+        // Update existing video
+        response = await fetch(`https://hydersoft.com/api/trainer/updatevideos/${editingVideo.video_id || editingVideo.id}`, {
+          method: 'POST',
+          body: formData,
         });
-        setUploadSuccess('✅ Video updated successfully!');
       } else {
-        response = await axios.post('https://hydersoft.com/api/trainer/videos', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+        // Upload new video
+        response = await fetch('https://hydersoft.com/api/trainer/videos', {
+          method: 'POST',
+          body: formData,
         });
-        setUploadSuccess('✅ Video uploaded successfully!');
       }
 
+      if (!response.ok) {
+        throw new Error(`${editingVideo ? 'Update' : 'Upload'} failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Upload/Update result:', result);
+
+      if (editingVideo) {
+        setUploadSuccess('✅ Video updated successfully!');
+      } else {
+        setUploadSuccess('✅ Video uploaded successfully!');
+      }
+      
       setUploadMessage('');
       setTimeout(() => setUploadSuccess(''), 4000);
 
@@ -107,9 +135,10 @@ function VideoUploader() {
       setEditingVideo(null);
       setShowModal(false);
       fetchVideos();
+
     } catch (error) {
       setUploadSuccess('');
-      setUploadMessage(error?.response?.data?.message || (editingVideo ? 'Update failed' : 'Upload failed'));
+      setUploadMessage(error.message || (editingVideo ? 'Update failed' : 'Upload failed'));
       console.error(editingVideo ? 'Update error:' : 'Upload error:', error);
     } finally {
       setUploading(false);
@@ -120,10 +149,22 @@ function VideoUploader() {
     if (!window.confirm('Are you sure you want to delete this video?')) return;
 
     try {
-      await axios.delete(`https://hydersoft.com/api/trainer/videos/${id}`);
+      const response = await fetch(`https://hydersoft.com/api/trainer/videos/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status}`);
+      }
+      
       fetchVideos();
     } catch (error) {
       console.error('Error deleting video:', error);
+      setUploadMessage(`Delete failed: ${error.message}`);
+      setTimeout(() => setUploadMessage(''), 3000);
     }
   };
 
@@ -184,6 +225,13 @@ function VideoUploader() {
         </button>
       </div>
 
+      {/* Error Message */}
+      {uploadMessage && (
+        <div className="mb-4 text-red-700 bg-red-100 border border-red-300 px-3 py-2 sm:px-4 sm:py-2 rounded text-sm sm:text-base">
+          {uploadMessage}
+        </div>
+      )}
+
       {/* Success Message */}
       {uploadSuccess && (
         <div className="mb-4 text-green-700 bg-green-100 border border-green-300 px-3 py-2 sm:px-4 sm:py-2 rounded text-sm sm:text-base">
@@ -197,6 +245,16 @@ function VideoUploader() {
           Loading videos...
         </div>
       )}
+
+      {/* Debug Info */}
+      {/* <div className="mb-4 text-xs text-gray-600 bg-gray-50 p-2 rounded">
+        <strong>Debug:</strong> Course ID: {courseId}, Videos count: {videos.length}
+        {videos.length > 0 && (
+          <div className="mt-1">
+            Video IDs: {videos.map(v => v.video_id).join(', ')}
+          </div>
+        )}
+      </div> */}
 
       {/* Desktop Table View */}
       <div className="hidden lg:block overflow-x-auto">
@@ -354,7 +412,7 @@ function VideoUploader() {
               {editingVideo ? 'Edit Video' : 'Upload Video'}
             </h2>
             
-            <form onSubmit={handleUpload} className="space-y-4">
+            <div className="space-y-4">
               <div>
                 <label className="block mb-1 font-medium text-sm sm:text-base">Course</label>
                 <select
@@ -438,14 +496,15 @@ function VideoUploader() {
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleUpload}
                   className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm sm:text-base"
                   disabled={uploading}
                 >
                   {uploading ? (editingVideo ? 'Updating...' : 'Uploading...') : (editingVideo ? 'Update' : 'Upload')}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
