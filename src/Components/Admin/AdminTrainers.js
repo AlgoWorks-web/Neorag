@@ -189,6 +189,65 @@ function AdminTrainers() {
   //   }
   // };
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+
+  //   const data = new FormData();
+  //   data.append('trainer_name', formData.trainerName);
+  //   data.append('bio', formData.bio);
+  //   data.append('expertise', formData.expertise);
+  //   data.append('location', formData.location);
+  //   data.append('phone_number', formData.phone_number);
+
+  //   if (!editTrainerId && formData.email) {
+  //     // Only include email during onboarding (not editing)
+  //     data.append('email', formData.email);
+  //   }
+
+  //   if (formData.profilePic) {
+  //     data.append('profile_pic', formData.profilePic);
+  //   }
+
+  //   try {
+  //     const url = editTrainerId
+  //       ? `https://hydersoft.com/api/admin/trainer/trainers/update/${editTrainerId}`
+  //       : 'https://hydersoft.com/api/admin/trainer/trainers';
+
+  //     const response = await fetch(url, {
+  //       method: 'POST',
+  //       body: data,
+  //     });
+
+  //     const result = await response.json();
+
+  //     if (response.ok) {
+  //       alert(editTrainerId ? 'Trainer updated successfully.' : 'Trainer onboarded successfully.');
+
+  //       setFormData({
+  //         trainerName: '',
+  //         email: '', // Reset after onboarding
+  //         profilePic: null,
+  //         bio: '',
+  //         expertise: '',
+  //         location: '',
+  //         phone_number: '',
+  //       });
+
+  //       setShowForm(false);
+  //       setEditTrainerId(null);
+  //       window.location.reload();
+  //     } else {
+  //       alert(result.message || 'Something went wrong.');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting form:', error);
+  //     alert('Error submitting the form.');
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -201,7 +260,6 @@ function AdminTrainers() {
     data.append('phone_number', formData.phone_number);
 
     if (!editTrainerId && formData.email) {
-      // Only include email during onboarding (not editing)
       data.append('email', formData.email);
     }
 
@@ -214,19 +272,50 @@ function AdminTrainers() {
         ? `https://hydersoft.com/api/admin/trainer/trainers/update/${editTrainerId}`
         : 'https://hydersoft.com/api/admin/trainer/trainers';
 
+      console.log('Submitting to URL:', url);
+
       const response = await fetch(url, {
         method: 'POST',
         body: data,
+        headers: {
+          // Add Accept header to explicitly request JSON
+          'Accept': 'application/json',
+          // Don't set Content-Type for FormData
+        },
       });
 
-      const result = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response headers:', [...response.headers.entries()]);
 
-      if (response.ok) {
-        alert(editTrainerId ? 'Trainer updated successfully.' : 'Trainer onboarded successfully.');
+      // Get the response text first
+      const responseText = await response.text();
+      console.log('Raw response:', responseText);
 
+      // Check content type
+      const contentType = response.headers.get('content-type') || '';
+
+      if (response.status === 200) {
+        // Handle successful response
+        if (contentType.includes('application/json')) {
+          // Parse as JSON
+          const result = JSON.parse(responseText);
+          console.log('Parsed JSON result:', result);
+
+          alert(editTrainerId ? 'Trainer updated successfully.' : 'Trainer onboarded successfully.');
+        } else if (contentType.includes('text/html')) {
+          // Server returned HTML but with 200 status - likely a success page
+          console.log('Server returned HTML success page');
+          alert(editTrainerId ? 'Trainer updated successfully.' : 'Trainer onboarded successfully.');
+        } else {
+          // Unknown content type but 200 status
+          console.log('Unknown content type but successful status');
+          alert(editTrainerId ? 'Trainer updated successfully.' : 'Trainer onboarded successfully.');
+        }
+
+        // Reset form and close modal
         setFormData({
           trainerName: '',
-          email: '', // Reset after onboarding
+          email: '',
           profilePic: null,
           bio: '',
           expertise: '',
@@ -236,17 +325,41 @@ function AdminTrainers() {
 
         setShowForm(false);
         setEditTrainerId(null);
-        window.location.reload();
+
+        // Refresh the trainers list
+        setCurrentPage(1);
+        window.location.reload(); // Or implement a better refresh mechanism
+
       } else {
-        alert(result.message || 'Something went wrong.');
+        // Handle error responses
+        if (contentType.includes('application/json')) {
+          const result = JSON.parse(responseText);
+          alert(result.message || result.error || 'Something went wrong.');
+        } else {
+          alert(`Server error: ${response.status} ${response.statusText}`);
+        }
       }
+
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('Error submitting the form.');
+
+      let errorMessage = 'Error submitting the form.';
+
+      if (error.name === 'SyntaxError' && error.message.includes('JSON')) {
+        errorMessage = 'Server returned an unexpected response format, but the operation may have succeeded. Please refresh the page to check.';
+      } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorMessage = 'Network error: Unable to connect to server.';
+      } else {
+        errorMessage = error.message || errorMessage;
+      }
+
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+
 
 
 
