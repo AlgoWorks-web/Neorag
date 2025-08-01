@@ -1,4 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Edit3, 
+  Save, 
+  X, 
+  Camera, 
+  Briefcase,
+  FileText,
+  AlertCircle,
+  Check,
+  Loader,
+  Upload
+} from 'lucide-react';
 
 const TrainerProfile = ({ trainerId }) => {
   const [formData, setFormData] = useState({
@@ -11,25 +27,35 @@ const TrainerProfile = ({ trainerId }) => {
     profile_pic: '',
   });
   const [avatar, setAvatar] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Fetch trainer details on component mount
   useEffect(() => {
     fetchTrainerDetails();
   }, [trainerId]);
 
+  // Clear success message after 3 seconds
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
   const fetchTrainerDetails = async () => {
     try {
       setLoading(true);
       setError('');
       
-      // Get trainer ID and ensure it's a simple number/string
       let id = trainerId || localStorage.getItem('trainerUser') || '1';
       
-      // If id is stored as JSON object, parse it and extract the ID
       if (typeof id === 'string' && id.startsWith('{')) {
         try {
           const parsed = JSON.parse(id);
@@ -59,7 +85,6 @@ const TrainerProfile = ({ trainerId }) => {
       const data = await response.json();
       console.log('Trainer data:', data);
       
-      // Handle different response structures
       const trainer = data.trainer || data;
       const user = trainer.user || {};
       
@@ -89,7 +114,21 @@ const TrainerProfile = ({ trainerId }) => {
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file');
+        return;
+      }
+
       setAvatar(file);
+      setAvatarPreview(URL.createObjectURL(file));
+      setError('');
     }
   };
 
@@ -99,11 +138,10 @@ const TrainerProfile = ({ trainerId }) => {
     try {
       setUpdating(true);
       setError('');
+      setSuccessMessage('');
       
-      // Get trainer ID and ensure it's a simple number/string
       let id = trainerId || localStorage.getItem('trainerUser');
       
-      // If id is stored as JSON object, parse it and extract the ID
       if (typeof id === 'string' && id.startsWith('{')) {
         try {
           const parsed = JSON.parse(id);
@@ -131,13 +169,11 @@ const TrainerProfile = ({ trainerId }) => {
         formDataToSend.append('profile_pic', avatar);
       }
       
-      // Use POST method with proper headers
       const response = await fetch(`https://hydersoft.com/api/admin/trainer/trainers/${id}`, {
         method: 'POST',
         body: formDataToSend,
         headers: {
           'Accept': 'application/json',
-          // Don't set Content-Type for FormData
         },
       });
       
@@ -149,13 +185,11 @@ const TrainerProfile = ({ trainerId }) => {
       const result = await response.json();
       console.log('Update result:', result);
       
-      // Refresh data after successful update
       await fetchTrainerDetails();
       setIsEditing(false);
       setAvatar(null);
-      
-      // Show success message
-      alert('Profile updated successfully!');
+      setAvatarPreview(null);
+      setSuccessMessage('Profile updated successfully!');
       
     } catch (err) {
       console.error('Error updating trainer:', err);
@@ -166,32 +200,53 @@ const TrainerProfile = ({ trainerId }) => {
   };
 
   const getProfileImageUrl = () => {
-    if (avatar) {
-      return URL.createObjectURL(avatar);
+    if (avatarPreview) {
+      return avatarPreview;
     }
     if (formData.profile_pic) {
       return formData.profile_pic;
     }
-    return '/api/placeholder/200/200'; // Placeholder image
+    return null;
+  };
+
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setAvatar(null);
+    setAvatarPreview(null);
+    setError('');
+    fetchTrainerDetails();
   };
 
   // Loading state
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8 max-w-full">
-        <div className="animate-pulse">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
-            <div className="h-8 bg-gray-300 rounded w-48 mb-4 sm:mb-0"></div>
-            <div className="h-10 bg-gray-300 rounded w-32"></div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 flex justify-center">
-              <div className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 bg-gray-300 rounded-full"></div>
-            </div>
-            <div className="lg:col-span-2 space-y-4">
-              <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-              <div className="h-20 bg-gray-300 rounded"></div>
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="animate-pulse">
+              {/* Header skeleton */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
+                <div className="flex items-center justify-between">
+                  <div className="h-8 bg-blue-500 rounded w-48"></div>
+                  <div className="h-10 bg-blue-500 rounded w-32"></div>
+                </div>
+              </div>
+              
+              {/* Content skeleton */}
+              <div className="p-6">
+                <div className="flex flex-col lg:flex-row gap-8">
+                  <div className="flex flex-col items-center lg:items-start">
+                    <div className="w-32 h-32 bg-gray-300 rounded-full mb-4"></div>
+                    <div className="h-6 bg-gray-300 rounded w-32 mb-2"></div>
+                    <div className="h-4 bg-gray-300 rounded w-40"></div>
+                  </div>
+                  <div className="flex-1 space-y-4">
+                    <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                    <div className="h-32 bg-gray-300 rounded"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -202,263 +257,396 @@ const TrainerProfile = ({ trainerId }) => {
   // Error state
   if (error && !isEditing) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8 max-w-full">
-        <div className="text-center py-8">
-          <div className="text-red-600 mb-4">
-            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+            <div className="text-center">
+              <div className="bg-red-100 rounded-full p-3 w-16 h-16 mx-auto mb-4">
+                <AlertCircle className="w-10 h-10 text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Profile</h3>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <button
+                onClick={fetchTrainerDetails}
+                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                <Loader className="w-4 h-4" />
+                Try Again
+              </button>
+            </div>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Profile</h3>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <button
-            onClick={fetchTrainerDetails}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-          >
-            Try Again
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8 max-w-full">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 space-y-3 sm:space-y-0">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-800">Profile Settings</h1>
-        {!isEditing && (
-          <button 
-            onClick={() => setIsEditing(true)}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg text-sm sm:text-base transition-colors"
-          >
-            Edit Profile
-          </button>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Success Message */}
+        {successMessage && (
+          <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+            <div className="bg-green-100 rounded-full p-1">
+              <Check className="w-4 h-4 text-green-600" />
+            </div>
+            <span className="text-green-800 font-medium">{successMessage}</span>
+          </div>
         )}
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold mb-1">Profile Settings</h1>
+                <p className="text-blue-100">Manage your trainer profile information</p>
+              </div>
+              {!isEditing ? (
+                <button 
+                  onClick={() => setIsEditing(true)}
+                  className="inline-flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  Edit Profile
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    disabled={updating}
+                    className="inline-flex items-center gap-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-medium py-2 px-3 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Error message during editing */}
+          {error && isEditing && (
+            <div className="m-6 mb-0 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+              <span className="text-red-800">{error}</span>
+            </div>
+          )}
+
+          {isEditing ? (
+            /* Edit Form */
+            <form onSubmit={handleSubmit} className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Profile Picture Section */}
+                <div className="lg:col-span-1">
+                  <div className="text-center">
+                    <div className="relative inline-block mb-4">
+                      <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200 bg-gray-100">
+                        {getProfileImageUrl() ? (
+                          <img
+                            src={getProfileImageUrl()}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <User className="w-16 h-16 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                      <label className="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-2 cursor-pointer transition-colors">
+                        <Camera className="w-4 h-4" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileSelect}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                    
+                    <div className="bg-blue-50 rounded-lg p-4 text-sm text-blue-800">
+                      <Upload className="w-4 h-4 inline mr-2" />
+                      Click the camera icon to upload a new photo
+                      <br />
+                      <span className="text-xs text-blue-600">Max file size: 5MB (JPG, PNG, GIF)</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Form Fields Section */}
+                <div className="lg:col-span-2">
+                  <div className="space-y-6">
+                    {/* Personal Information */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <User className="w-5 h-5 text-blue-600" />
+                        Personal Information
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="trainer_name" className="block text-sm font-medium text-gray-700 mb-2">
+                            Full Name <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            id="trainer_name"
+                            name="trainer_name"
+                            value={formData.trainer_name}
+                            onChange={handleChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                            Email Address
+                          </label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                              type="email"
+                              id="email"
+                              name="email"
+                              value={formData.email}
+                              disabled
+                              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                        </div>
+                        <div>
+                          <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700 mb-2">
+                            Phone Number
+                          </label>
+                          <div className="relative">
+                            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                              type="text"
+                              id="phone_number"
+                              name="phone_number"
+                              value={formData.phone_number}
+                              onChange={handleChange}
+                              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              placeholder="+1 (555) 123-4567"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+                            Location
+                          </label>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <input
+                              type="text"
+                              id="location"
+                              name="location"
+                              value={formData.location}
+                              onChange={handleChange}
+                              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                              placeholder="City, Country"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Professional Information */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Briefcase className="w-5 h-5 text-blue-600" />
+                        Professional Information
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="expertise" className="block text-sm font-medium text-gray-700 mb-2">
+                            Areas of Expertise <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            id="expertise"
+                            name="expertise"
+                            value={formData.expertise}
+                            onChange={handleChange}
+                            placeholder="e.g., Web Development, Data Science, Mobile Apps"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-2">
+                            Professional Bio
+                          </label>
+                          <textarea
+                            id="bio"
+                            name="bio"
+                            value={formData.bio}
+                            onChange={handleChange}
+                            rows="4"
+                            placeholder="Tell us about your experience, achievements, and what makes you passionate about teaching..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-vertical"
+                          ></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      disabled={updating}
+                      className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={updating}
+                      className="inline-flex items-center justify-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {updating ? (
+                        <>
+                          <Loader className="w-4 h-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" />
+                          Save Changes
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          ) : (
+            /* View Mode */
+            <div className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Profile Picture and Basic Info */}
+                <div className="lg:col-span-1">
+                  <div className="text-center lg:text-left">
+                    <div className="inline-block mb-6">
+                      <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-200 bg-gray-100">
+                        {getProfileImageUrl() ? (
+                          <img
+                            src={getProfileImageUrl()}
+                            // alt="Profile"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <User className="w-16 h-16 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="space-y-2 mb-6">
+                      <h2 className="text-xl font-bold text-gray-900">
+                        {formData.trainer_name || 'Name not provided'}
+                      </h2>
+                      <p className="text-gray-600 flex items-center justify-center lg:justify-start gap-2">
+                        <Mail className="w-4 h-4" />
+                        {formData.email || 'No email'}
+                      </p>
+                    </div>
+                    
+                    {/* Quick Contact Cards */}
+                    <div className="space-y-3">
+                      {formData.phone_number && (
+                        <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
+                          <Phone className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm text-gray-900">{formData.phone_number}</span>
+                        </div>
+                      )}
+                      {formData.location && (
+                        <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
+                          <MapPin className="w-4 h-4 text-gray-500" />
+                          <span className="text-sm text-gray-900">{formData.location}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Detailed Information */}
+                <div className="lg:col-span-2 space-y-8">
+                  {/* Expertise Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Briefcase className="w-5 h-5 text-blue-600" />
+                      Areas of Expertise
+                    </h3>
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+                      <p className="text-gray-900">
+                        {formData.expertise || 'No expertise areas specified'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Bio Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                      Professional Bio
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                      <p className="text-gray-700 leading-relaxed">
+                        {formData.bio || 'No bio available. Click "Edit Profile" to add information about yourself and your professional experience.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Profile Completion */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Profile Completion</h3>
+                    <div className="bg-white border border-gray-200 rounded-lg p-4">
+                      {(() => {
+                        const fields = [
+                          { key: 'trainer_name', label: 'Name' },
+                          { key: 'email', label: 'Email' },
+                          { key: 'phone_number', label: 'Phone' },
+                          { key: 'location', label: 'Location' },
+                          { key: 'expertise', label: 'Expertise' },
+                          { key: 'bio', label: 'Bio' },
+                        ];
+                        const completedFields = fields.filter(field => formData[field.key]);
+                        const completionPercentage = Math.round((completedFields.length / fields.length) * 100);
+                        
+                        return (
+                          <>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-gray-700">Profile Completeness</span>
+                              <span className="text-sm text-blue-600 font-semibold">{completionPercentage}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                              <div 
+                                className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                style={{ width: `${completionPercentage}%` }}
+                              ></div>
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              {completionPercentage === 100 
+                                ? 'Your profile is complete!' 
+                                : `Complete your profile to help students learn more about you.`
+                              }
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Error message during editing */}
-      {error && isEditing && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-600 text-sm">{error}</p>
-        </div>
-      )}
-
-      {isEditing ? (
-        /* Edit Form */
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* Profile Picture Section */}
-            <div className="lg:col-span-1 order-1 lg:order-none">
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-medium mb-2">Profile Picture</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-                {avatar && (
-                  <p className="mt-2 text-sm text-gray-600">Selected: {avatar.name}</p>
-                )}
-              </div>
-              
-              {/* Preview */}
-              <div className="flex justify-center mb-4">
-                <img
-                  src={getProfileImageUrl()}
-                  alt="Profile preview"
-                  className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-full border-2 border-gray-300"
-                />
-              </div>
-            </div>
-            
-            {/* Form Fields Section */}
-            <div className="lg:col-span-2 order-2 lg:order-none">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div className="sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-4 space-y-3 sm:space-y-0">
-                  <div>
-                    <label htmlFor="trainer_name" className="block text-gray-700 text-sm font-medium mb-1">Full Name *</label>
-                    <input
-                      type="text"
-                      id="trainer_name"
-                      name="trainer_name"
-                      value={formData.trainer_name}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2 focus:border-blue-500 text-sm sm:text-base"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-gray-700 text-sm font-medium mb-1">Email</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      disabled
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-sm sm:text-base"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
-                  </div>
-                </div>
-                
-                <div className="sm:col-span-2 sm:grid sm:grid-cols-2 sm:gap-4 space-y-3 sm:space-y-0">
-                  <div>
-                    <label htmlFor="phone_number" className="block text-gray-700 text-sm font-medium mb-1">Phone</label>
-                    <input
-                      type="text"
-                      id="phone_number"
-                      name="phone_number"
-                      value={formData.phone_number}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2 focus:border-blue-500 text-sm sm:text-base"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="location" className="block text-gray-700 text-sm font-medium mb-1">Location</label>
-                    <input
-                      type="text"
-                      id="location"
-                      name="location"
-                      value={formData.location}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2 focus:border-blue-500 text-sm sm:text-base"
-                    />
-                  </div>
-                </div>
-                
-                <div className="sm:col-span-2">
-                  <label htmlFor="expertise" className="block text-gray-700 text-sm font-medium mb-1">Expertise *</label>
-                  <input
-                    type="text"
-                    id="expertise"
-                    name="expertise"
-                    value={formData.expertise}
-                    onChange={handleChange}
-                    placeholder="e.g., Web Development, Data Science, Mobile Apps"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2 focus:border-blue-500 text-sm sm:text-base"
-                    required
-                  />
-                </div>
-                
-                <div className="sm:col-span-2">
-                  <label htmlFor="bio" className="block text-gray-700 text-sm font-medium mb-1">Bio</label>
-                  <textarea
-                    id="bio"
-                    name="bio"
-                    value={formData.bio}
-                    onChange={handleChange}
-                    rows="4"
-                    placeholder="Tell us about yourself, your experience, and what you're passionate about..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:ring-2 focus:border-blue-500 text-sm sm:text-base resize-vertical"
-                  ></textarea>
-                </div>
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="mt-6 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setAvatar(null);
-                    setError('');
-                    fetchTrainerDetails(); // Reset form data
-                  }}
-                  disabled={updating}
-                  className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm sm:text-base transition-colors disabled:opacity-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={updating}
-                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm sm:text-base transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {updating ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
-      ) : (
-        /* View Mode */
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Profile Picture and Basic Info */}
-          <div className="lg:col-span-1 flex flex-col items-center text-center lg:text-left lg:items-start">
-            <div className="flex flex-col items-center mb-4">
-              <img
-                src={getProfileImageUrl()}
-                alt="Profile"
-                className="w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 object-cover rounded-full border-2 border-gray-300 mb-3 sm:mb-4"
-              />
-              <div className="space-y-1">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
-                  {formData.trainer_name || 'Not provided'}
-                </h2>
-                <p className="text-sm sm:text-base text-gray-600 break-all">
-                  {formData.email || 'No email'}
-                </p>
-              </div>
-            </div>
-            
-            {/* Quick Info Cards on Mobile */}
-            <div className="lg:hidden w-full space-y-3 mb-6">
-              <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Phone</h4>
-                <p className="text-sm text-gray-900 mt-1">{formData.phone_number || 'Not provided'}</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 text-center">
-                <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Location</h4>
-                <p className="text-sm text-gray-900 mt-1">{formData.location || 'Not provided'}</p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Detailed Information */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Bio Section */}
-            <div>
-              <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2 sm:mb-3">About</h3>
-              <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
-                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                  {formData.bio || 'No bio available. Click "Edit Profile" to add information about yourself.'}
-                </p>
-              </div>
-            </div>
-            
-            {/* Details Grid - Hidden on Mobile */}
-            <div className="hidden lg:block">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Details</h3>
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">Phone</h4>
-                  <p className="text-gray-900">{formData.phone_number || 'Not provided'}</p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">Location</h4>
-                  <p className="text-gray-900">{formData.location || 'Not provided'}</p>
-                </div>
-                <div className="xl:col-span-2 bg-gray-50 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-gray-500 mb-1">Expertise</h4>
-                  <p className="text-gray-900">{formData.expertise || 'Not specified'}</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Expertise Section for Mobile */}
-            <div className="lg:hidden">
-              <h3 className="text-base font-medium text-gray-900 mb-2">Expertise</h3>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-sm text-gray-900">
-                  {formData.expertise || 'Not specified'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

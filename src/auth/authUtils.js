@@ -1,24 +1,3 @@
-// export const isStudentAuthenticated = () => {
-//   const student = localStorage.getItem("studentUser");
-//   return !!student;
-// };
-
-// export const isTrainerAuthenticated = () => {
-//   const trainer = localStorage.getItem("trainerUser");
-//   return !!trainer;
-// };
-
-// export const isAdminAuthenticated = () => {
-//   return !!localStorage.getItem('adminToken') && !!localStorage.getItem('adminUser');
-// };
-
-// export const getAdminUser = () => {
-//   const user = localStorage.getItem('adminUser');
-//   return user ? JSON.parse(user) : null;
-// };
-
-
-// authUtils.js
 export const isStudentAuthenticated = () => {
   const student = localStorage.getItem("studentUser");
   return !!student;
@@ -27,14 +6,13 @@ export const isStudentAuthenticated = () => {
 export const isTrainerAuthenticated = () => {
   const trainer = localStorage.getItem("trainerUser");
   const token = localStorage.getItem("authToken");
-  return !!trainer && !!token; // ← Both user data AND token required
+  return !!trainer && !!token;
 };
 
 export const isAdminAuthenticated = () => {
   return !!localStorage.getItem('adminToken') && !!localStorage.getItem('adminUser');
 };
 
-// Add these new utility functions:
 export const getTrainerUser = () => {
   const user = localStorage.getItem('trainerUser');
   return user ? JSON.parse(user) : null;
@@ -68,12 +46,10 @@ export const clearAdminAuth = () => {
   localStorage.removeItem('adminToken');
 };
 
-// Check if any user is authenticated
 export const isAuthenticated = () => {
   return isStudentAuthenticated() || isTrainerAuthenticated() || isAdminAuthenticated();
 };
 
-// Get current user role
 export const getCurrentUserRole = () => {
   if (isStudentAuthenticated()) return 'student';
   if (isTrainerAuthenticated()) return 'trainer';

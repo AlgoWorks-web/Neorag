@@ -269,7 +269,7 @@ function AdminTrainers() {
 
     try {
       const url = editTrainerId
-        ? `https://hydersoft.com/api/admin/trainer/trainers/update/${editTrainerId}`
+        ? `https://hydersoft.com/api/admin/trainer/trainers/${editTrainerId}`
         : 'https://hydersoft.com/api/admin/trainer/trainers';
 
       console.log('Submitting to URL:', url);
