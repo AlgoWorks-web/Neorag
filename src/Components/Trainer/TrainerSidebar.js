@@ -138,8 +138,9 @@ const TrainerSidebar = ({ sidebarOpen, toggleSidebar }) => {
                 <Sparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-blue-100 text-sm font-medium">Need Help?</p>
-                <p className="text-blue-300 text-xs">Contact Support</p>
+                <p className="text-blue-100 text-sm font-medium">© 2025 LearnHub LMS
+</p>
+               
               </div>
             </div>
           </div>

@@ -67,6 +67,7 @@ import PublicCourses from "./Components/PublicCourses";
 import PublicCourseDetails from "./Components/PublicCourseDetails";
 import PrivateRoute from '../src/auth/PrivateRoute';
 
+
 // 404 component
 import NotFound from './Components/NotFound';
 
@@ -176,6 +177,10 @@ function AppContent() {
           <Route path="studentprofile" element={<StudentProfile />} />
           <Route path="course-details/:courseId" element={<CourseDetail />} />
           <Route path="useragreement/:courseId" element={<Useragreement />} />
+        
+
+          
+
         </Route>
         <Route path="/payment-success" element={<PaymentSuccess />} />
 

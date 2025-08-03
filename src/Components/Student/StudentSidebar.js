@@ -132,7 +132,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
         </nav>
         
         {/* Quick Stats */}
-        <div className="px-4 mb-6">
+        {/* <div className="px-4 mb-6">
           <div className="bg-indigo-800/50 rounded-lg p-4 border border-indigo-600/30">
             <h3 className="text-indigo-100 text-sm font-medium mb-3 flex items-center gap-2">
               <Users className="w-4 h-4" />
@@ -149,10 +149,10 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
         
         {/* Support Section */}
-        <div className="px-4 mb-6">
+        {/* <div className="px-4 mb-6">
           <div className="bg-indigo-800/50 rounded-lg p-4 border border-indigo-600/30">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-lg">
@@ -164,7 +164,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
         
         {/* Footer */}
         <div className="px-4 pt-4 border-t border-indigo-700/50">

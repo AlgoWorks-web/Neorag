@@ -32,6 +32,16 @@ export const getAuthToken = () => {
   return localStorage.getItem('authToken');
 };
 
+// ✅ ADDED MISSING FUNCTION
+export const getTrainerHeaders = () => {
+  const token = localStorage.getItem('authToken');
+  return {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  };
+};
+
 export const clearTrainerAuth = () => {
   localStorage.removeItem('trainerUser');
   localStorage.removeItem('authToken');

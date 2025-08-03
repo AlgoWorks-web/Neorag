@@ -97,7 +97,7 @@ function TrainingInfo() {
       setClasses(classData);
 
     } catch (error) {
-      console.error('Error fetching classes:', error);
+      // console.error('Error fetching classes:', error);
       setClasses([]);
       setUploadMessage(error.message);
       setTimeout(() => setUploadMessage(''), 5000);
@@ -130,7 +130,7 @@ function TrainingInfo() {
       setClasses(classData);
 
     } catch (error) {
-      console.error('Error fetching all classes:', error);
+      // console.error('Error fetching all classes:', error);
       setClasses([]);
       setUploadMessage(error.message);
       setTimeout(() => setUploadMessage(''), 5000);
@@ -372,11 +372,11 @@ function TrainingInfo() {
       </div>
 
       {/* Error Message */}
-      {uploadMessage && (
+      {/* {uploadMessage && (
         <div className="mb-4 text-red-700 bg-red-100 border border-red-300 px-3 py-2 sm:px-4 sm:py-2 rounded text-sm sm:text-base">
           {uploadMessage}
         </div>
-      )}
+      )} */}
 
       {/* Success Message */}
       {uploadSuccess && (
