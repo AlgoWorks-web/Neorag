@@ -70,6 +70,7 @@ import PrivateRoute from '../src/auth/PrivateRoute';
 
 // 404 component
 import NotFound from './Components/NotFound';
+import ChangePassword from "./Components/Trainer/ChangePassword";
 
 
 function AppContent() {
@@ -159,6 +160,7 @@ function AppContent() {
           <Route path="videos" element={<VideoUploader />} />
           <Route path="profile" element={<TrainerProfile />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="changepassword" element={<ChangePassword/>}/>
         </Route>
 
         {/* Student Routes */}

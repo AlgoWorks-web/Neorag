@@ -82,7 +82,7 @@ const HomePage = () => {
                   Start Learning Free
                 </Link>
                 <Link 
-                  to="/services" 
+                  to="/publiccourses" 
                   className="px-6 py-3 md:px-8 md:py-4 bg-transparent border-2 border-white text-white font-bold rounded-full text-center hover:bg-white hover:text-indigo-600 transition-all"
                 >
                   Browse Courses
