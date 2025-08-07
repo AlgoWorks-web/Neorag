@@ -33,6 +33,11 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
       icon: <BookOpen className="w-5 h-5" />,
       label: "My Courses"
     },
+     {
+      to: "/student/schedule",
+      icon: <Calendar className="w-5 h-5" />,
+      label: "Class Schedule"
+    },
     {
       to: "/student/materials",
       icon: <FileText className="w-5 h-5" />,
@@ -42,12 +47,8 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
       to: "/student/videos",
       icon: <Play className="w-5 h-5" />,
       label: "Video Lectures"
-    },
-    {
-      to: "/student/schedule",
-      icon: <Calendar className="w-5 h-5" />,
-      label: "Class Schedule"
     }
+   
   ];
 
   return (

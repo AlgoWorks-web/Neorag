@@ -194,7 +194,7 @@ const StudentHome = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Dashboard</h1>
           {getStudentUser() && (
             <p className="text-gray-600">
-              Welcome back, <span className="font-medium">{getStudentUser().name || getStudentUser().email_id}</span>!
+              Welcome back, <span className="font-medium">{getStudentUser().username || getStudentUser().email_id}</span>!
             </p>
           )}
         </div>

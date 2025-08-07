@@ -201,7 +201,7 @@ function ScheduleView() {
           {getStudentUser() && (
             <div className="mb-4 p-3 bg-blue-50 rounded-lg">
               <p className="text-blue-800">
-                Welcome back, <span className="font-semibold">{getStudentUser().name || getStudentUser().email_id}</span>!
+                Welcome back, <span className="font-semibold">{getStudentUser().username || getStudentUser().email_id}</span>!
               </p>
             </div>
           )}

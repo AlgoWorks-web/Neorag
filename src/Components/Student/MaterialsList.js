@@ -998,7 +998,7 @@ const MaterialsList = () => {
               </h1>
               {getStudentUser() && (
                 <p className="text-gray-600 mt-1">
-                  Welcome back, <span className="font-medium">{getStudentUser().name || getStudentUser().email_id}</span>
+                  Welcome back, <span className="font-medium">{getStudentUser().username || getStudentUser().email_id}</span>
                 </p>
               )}
             </div>
