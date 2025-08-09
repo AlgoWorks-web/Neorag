@@ -1,6 +1,6 @@
 export const isStudentAuthenticated = () => {
   const student = localStorage.getItem("studentUser");
-  return !!student;
+  return !!student ;
 };
 
 export const isTrainerAuthenticated = () => {

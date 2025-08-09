@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
-import { getStudentUser, isStudentAuthenticated } from '../../auth/authUtils'; // Adjust path as needed
+import { getStudentUser, isStudentAuthenticated } from '../../auth/authUtils';
 
-const stripePromise = loadStripe('pk_test_51RVbIMHKv8G6Dr0HV8vYvZ2bQux6APWVlcvCrgFIBFkrD6Ivga3ssrHYxOnApFQF3LJPg0s5JMBc0mM4YdNhdXKG00L77W7fp6');
+// const stripePromise = loadStripe('pk_test_51RVbIMHKv8G6Dr0HV8vYvZ2bQux6APWVlcvCrgFIBFkrD6Ivga3ssrHYxOnApFQF3LJPg0s5JMBc0mM4YdNhdXKG00L77W7fp6');
+
+const stripePromise = loadStripe('pk_live_51RVbIMHKv8G6Dr0HbhJrUOA1tHIHep0iVn40KCu8pmNW5wtYfLyKxi4DadDCLV1gZivparTJlwGut5GD3BaijJBM00DDMm0dHl');
 
 function Useragreement() {
     const { courseId } = useParams();
@@ -15,59 +17,74 @@ function Useragreement() {
     const [agreementText, setAgreementText] = useState('');
     const [loading, setLoading] = useState(true);
     const [agreementAlreadySigned, setAgreementAlreadySigned] = useState(false);
+    
+    // Prevent duplicate API calls
+    const hasInitialized = useRef(false);
+    const isCheckingStatus = useRef(false);
 
     useEffect(() => {
+        // Prevent duplicate initialization in StrictMode
+        if (hasInitialized.current) return;
+        hasInitialized.current = true;
+
         if (!isStudentAuthenticated()) {
             navigate('/login');
             return;
         }
+        
         checkAgreementStatusAndFetch();
-    }, [courseId, navigate]);
+    }, [courseId]); // Removed navigate from dependencies
 
-   const checkAgreementStatusAndFetch = async () => {
-    try {
-        const studentData = getStudentUser();
+    const checkAgreementStatusAndFetch = async () => {
+        // Prevent multiple simultaneous calls
+        if (isCheckingStatus.current) return;
+        isCheckingStatus.current = true;
         
-        // Check agreement status
-        const statusResponse = await fetch('https://hydersoft.com/api/enrollments/check-agreement-status', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('studentToken')}`
-            },
-            body: JSON.stringify({
-                student_id: studentData.id,
-                course_id: parseInt(courseId)
-            })
-        });
-
-        const statusData = await statusResponse.json();
-        
-        if (statusData.success) {
-            const { agreement_signed, payment_completed, next_step } = statusData.data;
-            
-            if (payment_completed) {
-                // Already fully enrolled - don't allow re-signing
-                alert('You are already enrolled in this course');
-                navigate('/student/my-courses');
+        try {
+            const studentData = getStudentUser();
+            if (!studentData) {
+                navigate('/login');
                 return;
             }
             
-            // ✅ ALLOW re-signing even if agreement exists
-            // This lets users update their signature
+            // Always fetch agreement first to prevent UI flash
+            await fetchAgreementForCourse();
+            
+            // Then check enrollment status
+            const statusResponse = await fetch('https://hydersoft.com/api/enrollments/check-agreement-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('studentToken')}`
+                },
+                body: JSON.stringify({
+                    student_id: studentData.id,
+                    course_id: parseInt(courseId)
+                })
+            });
+
+            if (statusResponse.ok) {
+                const statusData = await statusResponse.json();
+                
+                if (statusData.success && statusData.data.payment_completed) {
+                    setAgreementAlreadySigned(true);
+                    return;
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error checking agreement status:', error);
+            // Still try to fetch agreement if status check fails
+            try {
+                await fetchAgreementForCourse();
+            } catch (agreementError) {
+                console.error('Agreement fetch also failed:', agreementError);
+            }
+        } finally {
+            setLoading(false);
+            isCheckingStatus.current = false;
         }
-
-        // Always fetch agreement text - allow signing/re-signing
-        await fetchAgreementForCourse();
-        
-    } catch (error) {
-        console.error('Error checking agreement status:', error);
-        await fetchAgreementForCourse();
-    } finally {
-        setLoading(false);
-    }
-};
-
+    };
 
     const fetchAgreementForCourse = async () => {
         try {
@@ -75,11 +92,12 @@ function Useragreement() {
             setAgreementText(res.data.data.user_agreement || '');
         } catch (error) {
             console.error('Agreement fetch error:', error);
-            alert('❌ No agreement found for this course.');
-            navigate('/student/courses'); // Redirect back to courses
+            setAgreementText('');
+            // Don't show alert or redirect here - let the main UI handle it gracefully
         }
     };
 
+    // YOUR ORIGINAL PAYMENT CODE - PRESERVED
     const proceedToPayment = async () => {
         try {
             const studentData = getStudentUser();
@@ -123,10 +141,15 @@ function Useragreement() {
             return;
         }
 
+        if (!agreementText) {
+            alert('❌ Agreement content not loaded. Please refresh the page.');
+            return;
+        }
+
         const studentData = getStudentUser();
         if (!studentData) {
             alert('❌ Student not found. Please log in again.');
-            navigate('/student/login');
+            navigate('/login');
             return;
         }
 
@@ -246,6 +269,7 @@ function Useragreement() {
         }
     };
 
+    // Loading state
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -257,19 +281,37 @@ function Useragreement() {
         );
     }
 
+    // Already enrolled state
     if (agreementAlreadySigned) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="text-blue-500 text-6xl mb-4">📄</div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Agreement Already Signed</h2>
-                    <p className="text-gray-600 mb-4">Redirecting to payment...</p>
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <div className="text-center max-w-md mx-auto p-6">
+                    <div className="text-green-500 text-6xl mb-4">✅</div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Already Enrolled</h2>
+                    <p className="text-gray-600 mb-6">
+                        You are already enrolled in this course and have completed payment. 
+                        You can access your course materials from your dashboard.
+                    </p>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => navigate('/student/mycourses')}
+                            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
+                        >
+                            Go to My Courses
+                        </button>
+                        <button
+                            onClick={() => navigate('/student')}
+                            className="w-full bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition"
+                        >
+                            Browse All Courses
+                        </button>
+                    </div>
                 </div>
             </div>
         );
     }
 
+    // Main agreement form
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-4xl mx-auto px-4">
@@ -283,7 +325,15 @@ function Useragreement() {
                         </div>
                     ) : (
                         <div className="my-4 p-4 bg-red-50 border border-red-200 rounded">
-                            <p className="text-red-600">No agreement found for this course.</p>
+                            <p className="text-red-600">
+                                No agreement found for this course. Please contact support or try refreshing the page.
+                            </p>
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="mt-2 text-blue-600 hover:text-blue-800 underline"
+                            >
+                                Refresh Page
+                            </button>
                         </div>
                     )}
 
@@ -295,7 +345,7 @@ function Useragreement() {
                                 checked={accepted}
                                 onChange={(e) => setAccepted(e.target.checked)}
                                 className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || !agreementText}
                             />
                             <label htmlFor="accept" className="text-sm text-gray-700">
                                 I have read and agree to the terms in the above agreement.
@@ -313,7 +363,7 @@ function Useragreement() {
                                 onChange={(e) => setSignature(e.target.value)}
                                 placeholder="Enter your full name"
                                 className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || !agreementText}
                             />
                         </div>
 
