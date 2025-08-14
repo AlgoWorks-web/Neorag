@@ -24,16 +24,36 @@ function ScheduleView() {
     };
   };
 
+  // ✅ FIXED: Helper function to get course info from enrollment data
+  const getCourseInfo = (enrollment) => {
+    if (enrollment.course && enrollment.course.course_id) {
+      return {
+        id: enrollment.course.course_id,
+        name: enrollment.course.title || 'Unknown Course'
+      };
+    } else if (enrollment.course_id) {
+      return {
+        id: enrollment.course_id,
+        name: enrollment.course_name || enrollment.title || 'Unknown Course'
+      };
+    }
+    return { id: null, name: 'Unknown Course' };
+  };
+
   // Fetch enrolled courses
   const fetchMyCourses = async () => {
     try {
+      console.log('=== FETCH MY COURSES DEBUG ===');
       const headers = getStudentHeaders();
+      console.log('Request headers:', headers);
       
       const response = await fetch('https://hydersoft.com/api/enrolledstudent/my-courses', {
         headers
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (response.status === 401) {
         setError('Authentication failed. Please log in again.');
@@ -42,8 +62,15 @@ function ScheduleView() {
 
       if (data.success) {
         setCourses(data.data);
+        console.log('Courses set:', data.data);
+        
+        // ✅ FIXED: Set first course using correct data structure
         if (data.data.length > 0) {
-          setSelectedCourse(data.data[0].course_id);
+          const firstCourse = getCourseInfo(data.data[0]);
+          console.log('Setting first course:', firstCourse);
+          if (firstCourse.id) {
+            setSelectedCourse(firstCourse.id.toString());
+          }
         }
       } else {
         setError(data.error || 'Failed to fetch courses');
@@ -58,6 +85,9 @@ function ScheduleView() {
   const fetchCourseClasses = async (courseId) => {
     if (!courseId) return;
 
+    console.log('=== FETCH CLASSES DEBUG ===');
+    console.log('Course ID:', courseId);
+    
     setRefreshing(true);
     try {
       const headers = getStudentHeaders();
@@ -66,7 +96,9 @@ function ScheduleView() {
         headers
       });
 
+      console.log('Classes response status:', response.status);
       const data = await response.json();
+      console.log('Classes response data:', data);
 
       if (response.status === 401) {
         setError('Authentication failed. Please log in again.');
@@ -84,6 +116,7 @@ function ScheduleView() {
           past: data.data.past_classes || []
         });
         setError('');
+        console.log('Classes set:', data.data);
       } else {
         setError(data.error || 'Failed to fetch classes');
         setClasses({ upcoming: [], past: [] });
@@ -117,9 +150,18 @@ function ScheduleView() {
   // Fetch classes when course selection changes
   useEffect(() => {
     if (selectedCourse) {
+      console.log('Selected course changed to:', selectedCourse);
       fetchCourseClasses(selectedCourse);
     }
   }, [selectedCourse]);
+
+  // ✅ FIXED: Course selection handler
+  const handleCourseChange = (e) => {
+    const courseId = e.target.value;
+    console.log('Course selection changed:', courseId);
+    setSelectedCourse(courseId);
+    setClasses({ upcoming: [], past: [] }); // Clear previous classes
+  };
 
   // Format date and time
   const formatDateTime = (dateTimeString) => {
@@ -148,7 +190,11 @@ function ScheduleView() {
 
   // Handle join class
   const handleJoinClass = (zoomLink) => {
-    window.open(zoomLink, '_blank');
+    if (zoomLink) {
+      window.open(zoomLink, '_blank');
+    } else {
+      setError('Zoom link not available for this class');
+    }
   };
 
   // Refresh classes
@@ -206,7 +252,7 @@ function ScheduleView() {
             </div>
           )}
           
-          {/* Course Selector */}
+          {/* ✅ FIXED: Course Selector */}
           <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
             <label htmlFor="course-select" className="font-semibold text-gray-700">
               Select Course:
@@ -215,16 +261,19 @@ function ScheduleView() {
               <select 
                 id="course-select"
                 value={selectedCourse} 
-                onChange={(e) => setSelectedCourse(e.target.value)}
+                onChange={handleCourseChange}
                 disabled={courses.length === 0}
                 className="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white focus:outline-none focus:border-blue-500 min-w-60"
               >
                 <option value="">Choose a course...</option>
-                {courses.map(course => (
-                  <option key={course.course_id} value={course.course_id}>
-                    {course.course_name}
-                  </option>
-                ))}
+                {courses.map(enrollment => {
+                  const courseInfo = getCourseInfo(enrollment);
+                  return (
+                    <option key={courseInfo.id || enrollment.enrollment_id} value={courseInfo.id}>
+                      {courseInfo.name}
+                    </option>
+                  );
+                })}
               </select>
               
               <button 
@@ -237,6 +286,9 @@ function ScheduleView() {
               </button>
             </div>
           </div>
+
+          
+       
         </div>
 
         {/* Error Display */}
@@ -394,3 +446,4 @@ function ScheduleView() {
 }
 
 export default ScheduleView;
+

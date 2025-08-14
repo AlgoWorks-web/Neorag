@@ -82,10 +82,10 @@ function StudentMyCourses() {
       console.log('=== API Request Debug ===');
       console.log('Student ID:', studentData.id);
       console.log('Student Email:', studentData.email);
-      console.log('Request URL:', 'https://hydersoft.com/api/enrollments/my-courses');
+      console.log('Request URL:', 'https://hydersoft.com/api/enrolledstudent/my-courses');
 
       // Updated API endpoint - make sure this matches your backend route
-      const response = await fetch('https://hydersoft.com/api/enrollments/my-courses', {
+      const response = await fetch('https://hydersoft.com/api/enrolledstudent/my-courses', {
         method: 'GET',
         headers: headers,
         mode: 'cors'

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Play, 
-  Clock, 
-  BookOpen, 
+import {
+  Play,
+  Clock,
+  BookOpen,
   Search,
   Grid3X3,
   List,
@@ -37,12 +37,33 @@ function VideoLectures() {
     if (!studentUser || !studentUser.id) {
       throw new Error('Student not found in localStorage');
     }
-    
+
     return {
       'X-Student-ID': studentUser.id.toString(),
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     };
+  };
+
+  // Helper function to safely get course info (handles both old and new data structures)
+  const getCourseInfo = (enrollment) => {
+    if (!enrollment) return { id: null, title: 'Unknown Course' };
+
+    // Handle new nested structure
+    if (enrollment.course) {
+      return {
+        id: enrollment.course.course_id,
+        title: enrollment.course.title || 'Unknown Course'
+      };
+    } else if (enrollment.course_id) {
+      // Fallback for old flattened structure
+      return {
+        id: enrollment.course_id,
+        title: enrollment.course_name || 'Unknown Course'
+      };
+    }
+
+    return { id: null, title: 'Unknown Course' };
   };
 
   // Create authenticated video URL
@@ -51,7 +72,7 @@ function VideoLectures() {
     if (!studentUser || !studentUser.id) {
       return video.stream_url;
     }
-    
+
     const baseUrl = video.stream_url;
     const separator = baseUrl.includes('?') ? '&' : '?';
     return `${baseUrl}${separator}student_id=${studentUser.id}`;
@@ -61,12 +82,16 @@ function VideoLectures() {
   const fetchMyCourses = async () => {
     try {
       const headers = getStudentHeaders();
-      
+
       const response = await fetch('https://hydersoft.com/api/enrolledstudent/my-courses', {
         headers
       });
 
       const data = await response.json();
+
+      console.log('=== API Response Debug ===');
+      console.log('Response status:', response.status);
+      console.log('Response data:', data);
 
       if (response.status === 401) {
         setError('Authentication failed. Please log in again.');
@@ -75,11 +100,18 @@ function VideoLectures() {
 
       if (data.success) {
         setCourses(data.data);
+        console.log('Courses set:', data.data);
+
+        // Auto-select first course if available
         if (data.data.length > 0) {
-          setSelectedCourse(data.data[0].course_id);
+          const firstCourse = getCourseInfo(data.data[0]);
+          if (firstCourse.id) {
+            setSelectedCourse(firstCourse.id);
+            console.log('Auto-selected course:', firstCourse.id);
+          }
         }
       } else {
-        setError(data.error || 'Failed to fetch courses');
+        setError(data.message || data.error || 'Failed to fetch courses');
       }
     } catch (err) {
       setError('Network error while fetching courses: ' + err.message);
@@ -88,18 +120,33 @@ function VideoLectures() {
   };
 
   // Fetch videos for selected course
+  // Fetch videos for selected course
   const fetchCourseVideos = async (courseId) => {
     if (!courseId) return;
+
+    console.log('=== FETCH VIDEOS DEBUG ===');
+    console.log('Course ID:', courseId);
+    console.log('Course ID type:', typeof courseId);
 
     setVideoLoading(true);
     try {
       const headers = getStudentHeaders();
-      
-      const response = await fetch(`https://hydersoft.com/api/enrolledstudent/course/${courseId}/videos`, {
+
+      // FIXED: Ensure proper URL construction
+      const videoUrl = `https://hydersoft.com/api/enrolledstudent/course/${courseId}/videos`;
+      console.log('Video API URL:', videoUrl);
+
+      const response = await fetch(videoUrl, {
+        method: 'GET', // Explicitly set method
         headers
       });
 
+      console.log('=== VIDEO API RESPONSE ===');
+      console.log('Response status:', response.status);
+      console.log('Response URL:', response.url);
+
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (response.status === 401) {
         setError('Authentication failed. Please log in again.');
@@ -114,13 +161,13 @@ function VideoLectures() {
       if (data.success) {
         setVideos(data.data);
         setError('');
-        
+
         // Auto-select first video if none selected
         if (data.data.length > 0 && !selectedVideo) {
           handleVideoSelect(data.data[0]);
         }
       } else {
-        setError(data.error || 'Failed to fetch videos');
+        setError(data.error || data.message || 'Failed to fetch videos');
         setVideos([]);
       }
     } catch (err) {
@@ -131,6 +178,7 @@ function VideoLectures() {
       setVideoLoading(false);
     }
   };
+
 
   // Initialize data
   useEffect(() => {
@@ -145,9 +193,17 @@ function VideoLectures() {
       await fetchMyCourses();
       setLoading(false);
     };
-    
+
     initializeData();
   }, []);
+
+  // Debug logging for courses data
+  useEffect(() => {
+    console.log('=== COURSES DATA DEBUG ===');
+    console.log('Courses array:', courses);
+    console.log('First course structure:', courses[0]);
+    console.log('Selected course ID:', selectedCourse);
+  }, [courses, selectedCourse]);
 
   // Fetch videos when course selection changes
   useEffect(() => {
@@ -161,7 +217,7 @@ function VideoLectures() {
   // Filter videos based on search only
   const filteredVideos = videos.filter(video => {
     return video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-           video.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      video.description?.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   // Format duration
@@ -176,7 +232,7 @@ function VideoLectures() {
   const handleVideoSelect = (video) => {
     setSelectedVideo(video);
     setError('');
-    
+
     const authenticatedUrl = createAuthenticatedVideoUrl(video);
     setAuthenticatedVideoUrl(authenticatedUrl);
   };
@@ -231,7 +287,7 @@ function VideoLectures() {
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Authentication Required</h2>
           <p className="text-gray-600 mb-4">Please log in as a student to access video lectures.</p>
-          <button 
+          <button
             className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
             onClick={() => window.location.href = '/login'}
           >
@@ -269,27 +325,33 @@ function VideoLectures() {
               )}
             </div>
 
-            {/* Course Selector */}
+            {/* Course Selector - UPDATED */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-gray-500" />
-                <select 
+                <select
                   value={selectedCourse}
                   onChange={(e) => setSelectedCourse(e.target.value)}
                   className="px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-48"
                   disabled={courses.length === 0}
                 >
                   <option value="">Select a course</option>
-                  {courses.map(course => (
-                    <option key={course.course_id} value={course.course_id}>
-                      {course.course_name}
-                    </option>
-                  ))}
+                  {courses.map(enrollment => {
+                    const courseInfo = getCourseInfo(enrollment);
+                    return (
+                      <option
+                        key={courseInfo.id || enrollment.enrollment_id}
+                        value={courseInfo.id}
+                      >
+                        {courseInfo.title}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
-              
+
               {selectedCourse && (
-                <button 
+                <button
                   onClick={handleRefresh}
                   disabled={refreshing}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
@@ -309,7 +371,7 @@ function VideoLectures() {
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-3">
             <AlertCircle className="w-5 h-5 flex-shrink-0" />
             <span>{error}</span>
-            <button 
+            <button
               onClick={() => setError('')}
               className="ml-auto text-red-600 hover:text-red-800 text-xl font-bold"
             >
@@ -336,7 +398,7 @@ function VideoLectures() {
       {selectedCourse && (
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            
+
             {/* Video Player Section */}
             <div className="xl:col-span-2">
               {selectedVideo ? (
@@ -351,7 +413,7 @@ function VideoLectures() {
                         </div>
                       </div>
                     )}
-                    
+
                     <video
                       key={selectedVideo.video_id}
                       className="w-full h-full"
@@ -367,14 +429,14 @@ function VideoLectures() {
                       onCanPlay={handleVideoCanPlay}
                       onPlaying={handleVideoPlaying}
                     >
-                      <source 
-                        src={authenticatedVideoUrl || selectedVideo.stream_url} 
-                        type="video/mp4" 
+                      <source
+                        src={authenticatedVideoUrl || selectedVideo.stream_url}
+                        type="video/mp4"
                       />
                       Your browser does not support the video tag.
                     </video>
                   </div>
-                  
+
                   {/* Video Info */}
                   <div className="p-6">
                     <div className="mb-4">
@@ -387,7 +449,7 @@ function VideoLectures() {
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center justify-between text-sm text-gray-500">
                       <div className="flex items-center gap-4">
                         <span className="flex items-center gap-1">
@@ -414,7 +476,7 @@ function VideoLectures() {
                 </div>
               )}
             </div>
-            
+
             {/* Video Playlist Section */}
             <div className="xl:col-span-1">
               <div className="bg-white rounded-lg shadow-lg">
@@ -424,27 +486,25 @@ function VideoLectures() {
                     <h3 className="text-lg font-semibold text-gray-900">
                       Course Videos ({filteredVideos.length})
                     </h3>
-                    
+
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-lg transition-colors ${
-                          viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                          }`}
                       >
                         <Grid3X3 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-lg transition-colors ${
-                          viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
-                        }`}
+                        className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                          }`}
                       >
                         <List className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
-                  
+
                   {/* Search Only */}
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -457,7 +517,7 @@ function VideoLectures() {
                     />
                   </div>
                 </div>
-                
+
                 {/* Video List */}
                 <div className="max-h-96 overflow-y-auto">
                   {filteredVideos.length === 0 ? (
@@ -473,17 +533,14 @@ function VideoLectures() {
                         <div
                           key={video.video_id}
                           onClick={() => handleVideoSelect(video)}
-                          className={`cursor-pointer transition-all duration-200 ${
-                            viewMode === 'grid' 
-                              ? `p-4 rounded-lg border-2 hover:shadow-md ${
-                                  selectedVideo?.video_id === video.video_id 
-                                    ? 'border-blue-500 bg-blue-50' 
-                                    : 'border-gray-200 hover:border-gray-300'
-                                }`
-                              : `p-4 hover:bg-gray-50 ${
-                                  selectedVideo?.video_id === video.video_id ? 'bg-blue-50' : ''
-                                }`
-                          }`}
+                          className={`cursor-pointer transition-all duration-200 ${viewMode === 'grid'
+                              ? `p-4 rounded-lg border-2 hover:shadow-md ${selectedVideo?.video_id === video.video_id
+                                ? 'border-blue-500 bg-blue-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                              }`
+                              : `p-4 hover:bg-gray-50 ${selectedVideo?.video_id === video.video_id ? 'bg-blue-50' : ''
+                              }`
+                            }`}
                         >
                           <div className="flex items-start gap-3">
                             <div className="flex-shrink-0">
@@ -491,18 +548,18 @@ function VideoLectures() {
                                 <Play className="w-4 h-4 text-white" />
                               </div>
                             </div>
-                            
+
                             <div className="flex-1 min-w-0">
                               <h4 className="font-medium text-gray-900 truncate mb-1">
                                 {video.title}
                               </h4>
-                              
+
                               {video.description && viewMode === 'grid' && (
                                 <p className="text-sm text-gray-600 line-clamp-2 mb-2">
                                   {video.description}
                                 </p>
                               )}
-                              
+
                               <div className="text-xs text-gray-500">
                                 <span>Sequence {video.sequence}</span>
                               </div>
