@@ -1,7 +1,10 @@
-export const isStudentAuthenticated = () => {
-  const student = localStorage.getItem("studentUser");
-  return !!student ;
-};
+// export const isStudentAuthenticated = () => {
+//   const student = localStorage.getItem("studentUser");
+//   return !!student ;
+// };
+export const isStudentAuthenticated = () =>
+  !!localStorage.getItem('studentUser') && !!localStorage.getItem('authToken');
+
 
 export const isTrainerAuthenticated = () => {
   const trainer = localStorage.getItem("trainerUser");
