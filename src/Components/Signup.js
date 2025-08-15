@@ -1,23 +1,26 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Signup = () => {
+  /* ─────── state ─────── */
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
   });
-
   const [message, setMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(null);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false); // 👈 Loading state
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+  /* ─────── helpers ─────── */
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,100 +58,117 @@ const Signup = () => {
     }
   };
 
+  /* ─────── UI ─────── */
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded shadow-md">
-        <h2 className="text-2xl font-semibold mb-6 text-center">Create Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl ring-1 ring-blue-100 p-8">
+        {/* Header */}
+        <h1 className="text-center text-3xl font-extrabold text-blue-700 mb-2">
+          Create account
+        </h1>
+        <p className="text-center text-sm text-blue-500 mb-8">
+          It’s quick and easy
+        </p>
 
+        {/* Message banner */}
         {message && (
           <div
-            className={`p-3 mb-4 text-sm rounded text-center font-medium ${isSuccess ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-              }`}
+            className={`mb-6 rounded-lg px-4 py-3 text-sm font-medium ${
+              isSuccess
+                ? "bg-green-50 text-green-700 ring-1 ring-green-200"
+                : "bg-red-50 text-red-700 ring-1 ring-red-200"
+            }`}
           >
             {message}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Username */}
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Username *</label>
+          <label className="block">
+            <span className="block text-sm font-medium text-blue-700 mb-1">
+              Username<span className="text-red-500">*</span>
+            </span>
             <input
               type="text"
               name="username"
               value={formData.username}
               onChange={handleChange}
-              placeholder="Enter username"
-              className="w-full p-2 mt-1 border rounded bg-gray-100"
               required
+              className="w-full rounded-lg border border-blue-200 bg-blue-50/30 px-4 py-3 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+              placeholder="john_doe"
             />
             {errors.username && (
-              <p className="text-red-500 text-sm mt-1">{errors.username[0]}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.username[0]}</p>
             )}
-          </div>
+          </label>
 
           {/* Email */}
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Email *</label>
+          <label className="block">
+            <span className="block text-sm font-medium text-blue-700 mb-1">
+              Email<span className="text-red-500">*</span>
+            </span>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="E.g. john@doe.com"
-              className="w-full p-2 mt-1 border rounded bg-gray-100"
               required
+              className="w-full rounded-lg border border-blue-200 bg-blue-50/30 px-4 py-3 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+              placeholder="you@example.com"
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.email[0]}</p>
             )}
-          </div>
+          </label>
 
           {/* Password */}
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium">Password *</label>
+          <label className="block relative">
+            <span className="block text-sm font-medium text-blue-700 mb-1">
+              Password<span className="text-red-500">*</span>
+            </span>
             <input
               type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Enter your password"
-              className="w-full p-2 mt-1 border rounded bg-gray-100"
               required
+              className="w-full rounded-lg border border-blue-200 bg-blue-50/30 px-4 py-3 pr-12 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow"
+              placeholder="••••••••"
             />
-            <div className="text-sm text-gray-500 mt-1">
-              {showPassword ? "🔓 Visible" : "🔒 Hidden"}
-              <button
-                type="button"
-                className="ml-2 text-blue-500 underline"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
+            <span
+              className="absolute top-9 right-4 text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password[0]}</p>
+              <p className="text-red-500 text-xs mt-1">{errors.password[0]}</p>
             )}
-          </div>
+          </label>
 
           {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition flex justify-center items-center"
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-white font-semibold shadow-md hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              "Register"
+            {loading && (
+              <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             )}
+            {loading ? "Registering…" : "Register"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm">
+        {/* Footer */}
+        <p className="mt-10 text-center text-sm text-blue-600">
           Already have an account?{" "}
-          <Link to="/login" className="text-blue-600 hover:underline">
-            Login
+          <Link
+            to="/login"
+            className="font-semibold hover:underline hover:text-blue-800"
+          >
+            Log in
           </Link>
         </p>
       </div>

@@ -4,6 +4,7 @@ import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
+  /* ─────── state ─────── */
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [role, setRole] = useState("student");
   const [message, setMessage] = useState("");
@@ -13,26 +14,31 @@ const Login = () => {
   const [showResendButton, setShowResendButton] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  /* ─────── helpers ─────── */
+  const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  const handleRoleChange = (newRole) => {
+    setRole(newRole);
+    setMessage("");
+    setIsSuccess(null);
+    setShowResendButton(false);
   };
 
   const handleResendVerification = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("https://hydersoft.com/api/student/resend-verification", {
-        email: formData.email,
-      });
-
+      await axios.post(
+        "https://hydersoft.com/api/student/resend-verification",
+        { email: formData.email }
+      );
       setMessage("✅ Verification email sent! Please check your inbox.");
       setIsSuccess(true);
       setShowResendButton(false);
-    } catch (error) {
-      if (error.response && error.response.data.message) {
-        setMessage(error.response.data.message);
-      } else {
-        setMessage("Failed to resend verification email.");
-      }
+    } catch (err) {
+      setMessage(
+        err.response?.data?.message || "Failed to resend verification email."
+      );
       setIsSuccess(false);
     } finally {
       setLoading(false);
@@ -47,6 +53,7 @@ const Login = () => {
     setLoading(true);
 
     try {
+      /* endpoint & payload depend on role */
       const endpoint =
         role === "student"
           ? "https://hydersoft.com/api/student/login"
@@ -54,255 +61,197 @@ const Login = () => {
 
       const payload =
         role === "student"
-          ? {
-            email: formData.email,
-            password: formData.password,
-          }
-          : {
-            email_id: formData.email,
-            password: formData.password,
-          };
+          ? { email: formData.email, password: formData.password }
+          : { email_id: formData.email, password: formData.password };
 
-      const response = await axios.post(endpoint, payload);
+      const { data } = await axios.post(endpoint, payload);
 
-      if (response.data.success) {
-        console.log("=== LOGIN RESPONSE ===", response.data);
-        console.log("=== USER DATA ===", response.data.user);
-
-        // Store user data
+      if (data.success) {
+        /* store user */
         localStorage.setItem(
           role === "student" ? "studentUser" : "trainerUser",
-          JSON.stringify(response.data.user)
+          JSON.stringify(data.user)
         );
 
-        // 🔥 Enhanced token handling for trainers
+        /* store token for trainer (various key names) */
         if (role === "trainer") {
-          console.log("=== CHECKING FOR TOKEN ===", {
-            token: response.data.token,
-            access_token: response.data.access_token,
-            auth_token: response.data.auth_token
-          });
-
-          let tokenSaved = false;
-
-          if (response.data.token) {
-            localStorage.setItem('authToken', response.data.token);
-            console.log("=== TOKEN SAVED ===", response.data.token.substring(0, 20) + '...');
-            tokenSaved = true;
-          } else if (response.data.access_token) {
-            localStorage.setItem('authToken', response.data.access_token);
-            console.log("=== ACCESS TOKEN SAVED ===", response.data.access_token.substring(0, 20) + '...');
-            tokenSaved = true;
-          } else if (response.data.auth_token) {
-            localStorage.setItem('authToken', response.data.auth_token);
-            console.log("=== AUTH TOKEN SAVED ===", response.data.auth_token.substring(0, 20) + '...');
-            tokenSaved = true;
-          } else {
-            console.error("=== NO TOKEN FOUND IN RESPONSE ===");
-            console.log("Available keys:", Object.keys(response.data));
-          }
-
-          // Debug: Verify what was saved
-          const savedToken = localStorage.getItem('authToken');
-          const savedUser = localStorage.getItem('trainerUser');
-          console.log("=== VERIFICATION ===");
-          console.log("Token saved:", savedToken ? savedToken.substring(0, 20) + '...' : 'NOT FOUND');
-          console.log("User saved:", savedUser ? 'YES' : 'NO');
-
-          if (!tokenSaved) {
-            setMessage("⚠️ Login successful but authentication token is missing. Some features may not work properly.");
-            setIsSuccess(true);
-          }
+          const token =
+            data.token || data.access_token || data.auth_token || null;
+          if (token) localStorage.setItem("authToken", token);
         }
 
-        // Success message
-        if (role === "trainer" && !localStorage.getItem('authToken')) {
-          setMessage("⚠️ Login successful but with limited functionality. Please contact support if issues persist.");
-        } else {
-          setMessage("✅ Login successful! Redirecting...");
-        }
-        
+        setMessage("✅ Login successful! Redirecting…");
         setIsSuccess(true);
-        
-        // Small delay to show success message
-        setTimeout(() => {
-          navigate(role === "student" ? "/student" : "/trainer");
-        }, 1500);
-
+        setTimeout(
+          () => navigate(role === "student" ? "/student" : "/trainer"),
+          1500
+        );
       } else {
         setMessage("❌ Login failed. Invalid credentials.");
         setIsSuccess(false);
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      
-      if (error.response) {
-        const { status, data } = error.response;
-
-        if (status === 403 && data.message && data.message.includes("verify")) {
-          setMessage("⚠️ Please verify your email before logging in.");
-          setIsSuccess(false);
-          setShowResendButton(true);
-        } else if (status === 401) {
-          setMessage("❌ Invalid email or password. Please try again.");
-          setIsSuccess(false);
-        } else if (status === 422) {
-          setMessage("❌ Please check your email format and password.");
-          setIsSuccess(false);
-        } else if (status === 500) {
-          setMessage("🔧 Server error. Please try again later.");
-          setIsSuccess(false);
-        } else {
-          setMessage(data.message || `Error ${status}: Please try again.`);
-          setIsSuccess(false);
-        }
-      } else if (error.request) {
-        setMessage("🌐 Network error. Please check your internet connection.");
-        setIsSuccess(false);
+    } catch (err) {
+      const { status, data } = err.response || {};
+      if (status === 403 && data?.message?.includes("verify")) {
+        setMessage("⚠️ Please verify your email before logging in.");
+        setShowResendButton(true);
+      } else if (status === 401) {
+        setMessage("❌ Invalid email or password. Please try again.");
+      } else if (status === 422) {
+        setMessage("❌ Please check your email format and password.");
+      } else if (status === 500) {
+        setMessage("🔧 Server error. Please try again later.");
+      } else if (err.request) {
+        setMessage("🌐 Network error. Please check your connection.");
       } else {
         setMessage("❌ An unexpected error occurred. Please try again.");
-        setIsSuccess(false);
       }
+      setIsSuccess(false);
     } finally {
       setLoading(false);
     }
   };
 
-  // Clear messages when switching roles
-  const handleRoleChange = (newRole) => {
-    setRole(newRole);
-    setMessage("");
-    setIsSuccess(null);
-    setShowResendButton(false);
-  };
-
+  /* ─────── UI ─────── */
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-blue-100 to-blue-200 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl ring-1 ring-blue-100 p-8">
+        {/* Header */}
+        <h1 className="text-center text-3xl font-extrabold text-blue-700 mb-2">
+          Sign in
+        </h1>
+        <p className="text-center text-sm text-blue-500 mb-8">
+          Choose your role and enter your credentials
+        </p>
 
-        {/* Toggle Buttons */}
-        <div className="flex justify-center mb-6">
-          <button
-            onClick={() => handleRoleChange("student")}
-            className={`px-6 py-2 rounded-l-lg transition-colors duration-200 ${
-              role === "student" 
-                ? "bg-blue-600 text-white shadow-md" 
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-          >
-            Student
-          </button>
-          <button
-            onClick={() => handleRoleChange("trainer")}
-            className={`px-6 py-2 rounded-r-lg transition-colors duration-200 ${
-              role === "trainer" 
-                ? "bg-blue-600 text-white shadow-md" 
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-          >
-            Trainer
-          </button>
+        {/* Role toggle */}
+        <div className="flex mb-8 overflow-hidden rounded-lg ring-1 ring-blue-200">
+          {["student", "trainer"].map((r) => (
+            <button
+              key={r}
+              onClick={() => handleRoleChange(r)}
+              className={`flex-1 py-2 transition-colors text-sm font-semibold
+                ${
+                  role === r
+                    ? "bg-blue-600 text-white shadow-inner"
+                    : "bg-white text-blue-600 hover:bg-blue-50"
+                }`}
+            >
+              {r.charAt(0).toUpperCase() + r.slice(1)}
+            </button>
+          ))}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Email Address</label>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Email */}
+          <label className="block">
+            <span className="block text-sm font-medium text-blue-700 mb-1">
+              Email address
+            </span>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-              placeholder="Enter your email"
+              className="w-full rounded-lg border border-blue-200 bg-blue-50/30 px-4 py-3
+                         placeholder-blue-300 focus:(outline-none ring-2 ring-blue-500)
+                         transition-shadow"
+              placeholder="you@example.com"
             />
-          </div>
+          </label>
 
-          <div className="relative">
-            <label className="block text-gray-700 font-medium mb-2">Password</label>
+          {/* Password */}
+          <label className="block relative">
+            <span className="block text-sm font-medium text-blue-700 mb-1">
+              Password
+            </span>
             <input
               type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 pr-12"
-              placeholder="Enter your password"
+              className="w-full rounded-lg border border-blue-200 bg-blue-50/30 px-4 py-3 pr-12
+                         placeholder-blue-300 focus:(outline-none ring-2 ring-blue-500)
+                         transition-shadow"
+              placeholder="••••••••"
             />
-            <div
-              className="absolute right-4 top-11 cursor-pointer text-gray-500 hover:text-gray-700 transition-colors duration-200"
+            <span
+              className="absolute top-9 right-4 text-blue-500 cursor-pointer hover:text-blue-700 transition-colors"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-            </div>
-          </div>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </label>
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex justify-center items-center font-medium disabled:bg-blue-400 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-blue-600
+                       py-3 text-white font-semibold shadow-md hover:bg-blue-700
+                       disabled:(bg-blue-300 cursor-not-allowed) transition-colors"
           >
-            {loading ? (
-              <div className="flex items-center">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                Logging in...
-              </div>
-            ) : (
-              `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`
+            {loading && (
+              <span className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             )}
+            {loading ? "Signing in…" : `Login as ${role}`}
           </button>
         </form>
 
-        {/* Message Display */}
+        {/* Message */}
         {message && (
-          <div className={`mt-4 p-4 rounded-lg ${
-            isSuccess 
-              ? "bg-green-50 text-green-700 border border-green-200" 
-              : "bg-red-50 text-red-700 border border-red-200"
-          }`}>
-            <p className="text-center text-sm font-medium">{message}</p>
+          <div
+            className={`mt-6 rounded-lg px-4 py-3 text-sm font-medium
+              ${
+                isSuccess
+                  ? "bg-green-50 text-green-700 ring-1 ring-green-200"
+                  : "bg-red-50 text-red-700 ring-1 ring-red-200"
+              }`}
+          >
+            {message}
           </div>
         )}
 
-        {/* Resend Verification Button */}
+        {/* Resend verification */}
         {showResendButton && (
           <button
             onClick={handleResendVerification}
             disabled={loading}
-            className="w-full mt-3 bg-orange-500 text-white p-3 rounded-lg hover:bg-orange-600 transition-colors duration-200 disabled:bg-orange-400 disabled:cursor-not-allowed"
+            className="w-full mt-4 rounded-lg bg-blue-500 py-2 text-white font-semibold
+                       hover:bg-blue-600 disabled:(bg-blue-300 cursor-not-allowed)
+                       transition-colors"
           >
-            {loading ? "Sending..." : "Resend Verification Email"}
+            {loading ? "Sending…" : "Resend Verification Email"}
           </button>
         )}
 
-        {/* Footer Links */}
-        <div className="mt-6 text-center space-y-2">
-          <p className="text-gray-600">
-            Don't have an account?{" "}
-            <a href="/signup" className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200">
+        {/* Footer */}
+        <div className="mt-10 space-y-2 text-center text-sm">
+          <p className="text-blue-600">
+            Don’t have an account?{" "}
+            <a
+              href="/signup"
+              className="font-semibold hover:underline hover:text-blue-800"
+            >
               Register here
             </a>
           </p>
           <p>
-            <a href="/forgot-password" className="text-blue-600 hover:text-blue-800 text-sm transition-colors duration-200">
+            <a
+              href="/forgot-password"
+              className="text-blue-500 hover:text-blue-800 hover:underline"
+            >
               Forgot your password?
             </a>
           </p>
         </div>
-
-        {/* Debug Info (Remove in production) */}
-        {/* {process.env.NODE_ENV === 'development' && (
-          <div className="mt-4 p-2 bg-gray-100 rounded text-xs text-gray-600">
-            <strong>Debug Info:</strong>
-            <br />Role: {role}
-            <br />Loading: {loading.toString()}
-            <br />Message: {message || 'None'}
-          </div>
-        )} */}
       </div>
     </div>
   );
 };
 
 export default Login;
+

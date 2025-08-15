@@ -14,7 +14,7 @@ const ForgotPassword = () => {
     setIsSubmitting(true); // Start loading
 
     try {
-      const response = await axios.post("https://hydersoft.com/api/forgot-password", { email });
+      const response = await axios.post("https://hydersoft.com/api/student/forgot-password", { email });
 
       if (response.data.message) {
         setMessage("Reset link sent to your email.");
