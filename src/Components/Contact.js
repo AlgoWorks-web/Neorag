@@ -22,7 +22,7 @@ const ContactUs = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("https://hydersoft.com/api/contact", {
+      const res = await fetch("https://hydersoft.com/api/connectingwires/contact", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
