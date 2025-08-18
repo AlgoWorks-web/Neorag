@@ -31,7 +31,7 @@ function AdminTrainers() {
 
         console.log(`Fetching trainers: page=${currentPage}, per_page=${perPage}`);
 
-        const response = await fetch(`https://hydersoft.com/api/admin/trainer/trainers?page=${currentPage}&per_page=${perPage}`, {
+        const response = await fetch(`https://hydersoft.com/api/secure/trainer/trainers?page=${currentPage}&per_page=${perPage}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -164,8 +164,8 @@ function AdminTrainers() {
 
     try {
       const url = editTrainerId
-        ? `https://hydersoft.com/api/admin/trainer/trainers/${editTrainerId}`
-        : 'https://hydersoft.com/api/admin/trainer/trainers';
+        ? `https://hydersoft.com/api/secure/trainer/trainers/${editTrainerId}`
+        : 'https://hydersoft.com/api/secure/trainer/trainers';
 
       console.log('Submitting to URL:', url);
 
@@ -262,7 +262,7 @@ function AdminTrainers() {
     if (!window.confirm('Are you sure you want to delete this trainer?')) return;
 
     try {
-      const response = await fetch(`https://hydersoft.com/api/admin/trainer/trainers/${id}`, {
+      const response = await fetch(`https://hydersoft.com/api/secure/trainer/trainers/${id}`, {
         method: 'DELETE',
       });
 

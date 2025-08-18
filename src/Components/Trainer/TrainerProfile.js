@@ -68,7 +68,7 @@ const TrainerProfile = ({ trainerId }) => {
       
       console.log('Fetching trainer with ID:', id);
       
-      const response = await fetch(`https://hydersoft.com/api/admin/trainer/trainers/${id}`, {
+      const response = await fetch(`https://hydersoft.com/api/secure/trainer/trainers/${id}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -169,7 +169,7 @@ const TrainerProfile = ({ trainerId }) => {
         formDataToSend.append('profile_pic', avatar);
       }
       
-      const response = await fetch(`https://hydersoft.com/api/admin/trainer/trainers/${id}`, {
+      const response = await fetch(`https://hydersoft.com/api/secure/trainer/trainers/${id}`, {
         method: 'POST',
         body: formDataToSend,
         headers: {

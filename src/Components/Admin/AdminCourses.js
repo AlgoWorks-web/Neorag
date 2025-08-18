@@ -48,7 +48,7 @@ function AdminCourses() {
 
         // Fetch trainers from API
         try {
-          const trainersResponse = await fetch('https://hydersoft.com/api/admin/trainer/trainers', {
+          const trainersResponse = await fetch('https://hydersoft.com/api/secure/trainer/trainers', {
             headers: { Accept: 'application/json' },
           });
 

@@ -43,7 +43,7 @@ function Agreements() {
 
   const fetchAgreements = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/showagreements`, { headers: getAuthHeaders() });
+      const res = await axios.get(`${API_BASE_URL}/agreementpaper/showagreements`, { headers: getAuthHeaders() });
       setAgreements(Array.isArray(res.data) ? res.data : res.data.data || []);
     } catch (error) {
       toast.error('Error fetching agreements');
@@ -54,7 +54,7 @@ function Agreements() {
     e.preventDefault();
     if (!agreementText || !selectedCourse) return toast.error('Enter agreement text and select course');
     try {
-      await axios.post(`${API_BASE_URL}/agreements`, {
+      await axios.post(`${API_BASE_URL}/agreementpaper/agreements`, {
         course_master_id: selectedCourse,
         user_agreement: agreementText
       }, { headers: getAuthHeaders() });
@@ -76,7 +76,7 @@ function Agreements() {
     e.preventDefault();
     if (!agreementText || !selectedCourse) return toast.error('Enter text and select course');
     try {
-      await axios.put(`${API_BASE_URL}/agreements/${editingAgreement.agreement_id}`, {
+      await axios.put(`${API_BASE_URL}/agreementpaper/agreements/${editingAgreement.agreement_id}`, {
         course_master_id: selectedCourse,
         user_agreement: agreementText
       }, { headers: getAuthHeaders() });
@@ -90,7 +90,7 @@ function Agreements() {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete agreement?')) return;
     try {
-      await axios.delete(`${API_BASE_URL}/agreements/${id}`, { headers: getAuthHeaders() });
+      await axios.delete(`${API_BASE_URL}/agreementpaper/agreements/${id}`, { headers: getAuthHeaders() });
       toast.success('Deleted');
       setRefresh(!refresh);
     } catch {

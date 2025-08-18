@@ -12,6 +12,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showResendButton, setShowResendButton] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
   /* ─────── helpers ─────── */
@@ -45,6 +46,21 @@ const Login = () => {
     }
   };
 
+  // Normalize user data to ensure consistency
+  const normalizeUserData = (userData, userRole) => {
+    const normalized = {
+      id: userData.id || userData.trainer_id || userData.user_id,
+      name: userData.username || userData.trainer_name || userData.name,
+      email: userData.email || userData.email_id,
+      role: userRole,
+      isActive: userData.is_active !== undefined ? userData.is_active : true,
+      ...userData
+    };
+
+    console.log(`Normalized ${userRole} data:`, normalized);
+    return normalized;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -57,41 +73,84 @@ const Login = () => {
       const endpoint =
         role === "student"
           ? "https://hydersoft.com/api/student/login"
-          : "https://hydersoft.com/api/admin/trainer/login";
+          : "https://hydersoft.com/api/secure/trainer/login";
 
       const payload =
         role === "student"
           ? { email: formData.email, password: formData.password }
           : { email_id: formData.email, password: formData.password };
 
+      console.log(`Attempting ${role} login with payload:`, payload);
+
       const { data } = await axios.post(endpoint, payload);
 
       if (data.success) {
-        /* store user */
-        localStorage.setItem(
-          role === "student" ? "studentUser" : "trainerUser",
-          JSON.stringify(data.user)
-        );
+        const normalizedUser = normalizeUserData(data.user, role);
+        const storageKey = role === "student" ? "studentUser" : "trainerUser";
+        localStorage.setItem(storageKey, JSON.stringify(normalizedUser));
+
+        // Correct: get token from backend response and store in localStorage
+        const token =
+          data.token || data.access_token || data.auth_token || null;
+        if (token) {
+          localStorage.setItem("authToken", token);
+          console.log("Token stored:", token.substring(0, 20) + "...");
+        }
+
+        // ✅ CREATE TOKENS FOR BOTH STUDENTS AND TRAINERS
+        if (role === "student") {
+          // Create a student session token for API authentication
+          const studentToken = btoa(JSON.stringify({
+            student_id: normalizedUser.id,
+            email: normalizedUser.email,
+            role: 'student',
+            timestamp: Date.now()
+          }));
+          localStorage.setItem("authToken", studentToken);
+          console.log("Student token created and stored");
+        }
 
         /* store token for trainer (various key names) */
         if (role === "trainer") {
           const token =
             data.token || data.access_token || data.auth_token || null;
-          if (token) localStorage.setItem("authToken", token);
+          if (token) {
+            localStorage.setItem("authToken", token);
+            console.log("Trainer token stored:", token.substring(0, 20) + "...");
+          }
         }
+
+        // Update authentication state
+        setIsAuthenticated(true);
 
         setMessage("✅ Login successful! Redirecting…");
         setIsSuccess(true);
-        setTimeout(
-          () => navigate(role === "student" ? "/student" : "/trainer"),
-          1500
-        );
+
+        const targetRoute = role === "student" ? "/student" : "/trainer";
+        console.log(`Redirecting to: ${targetRoute}`);
+
+        // Navigate with replace to avoid back button issues
+        setTimeout(() => {
+          try {
+            navigate(targetRoute, { replace: true });
+            console.log(`Navigation to ${targetRoute} executed`);
+          } catch (navError) {
+            console.error("Navigation error:", navError);
+            // Fallback: use window.location if navigate fails
+            window.location.href = targetRoute;
+          }
+        }, 1000);
+
       } else {
+        console.log("Login failed - server returned success: false");
         setMessage("❌ Login failed. Invalid credentials.");
         setIsSuccess(false);
       }
     } catch (err) {
+      console.error("Login error:", err);
+
       const { status, data } = err.response || {};
+
       if (status === 403 && data?.message?.includes("verify")) {
         setMessage("⚠️ Please verify your email before logging in.");
         setShowResendButton(true);
@@ -131,10 +190,9 @@ const Login = () => {
               key={r}
               onClick={() => handleRoleChange(r)}
               className={`flex-1 py-2 transition-colors text-sm font-semibold
-                ${
-                  role === r
-                    ? "bg-blue-600 text-white shadow-inner"
-                    : "bg-white text-blue-600 hover:bg-blue-50"
+                ${role === r
+                  ? "bg-blue-600 text-white shadow-inner"
+                  : "bg-white text-blue-600 hover:bg-blue-50"
                 }`}
             >
               {r.charAt(0).toUpperCase() + r.slice(1)}
@@ -155,8 +213,10 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               required
+              disabled={loading}
               className="w-full rounded-lg border border-blue-200 bg-blue-50/30 px-4 py-3
                          placeholder-blue-300 focus:(outline-none ring-2 ring-blue-500)
+                         disabled:opacity-50 disabled:cursor-not-allowed
                          transition-shadow"
               placeholder="you@example.com"
             />
@@ -173,8 +233,10 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
+              disabled={loading}
               className="w-full rounded-lg border border-blue-200 bg-blue-50/30 px-4 py-3 pr-12
                          placeholder-blue-300 focus:(outline-none ring-2 ring-blue-500)
+                         disabled:opacity-50 disabled:cursor-not-allowed
                          transition-shadow"
               placeholder="••••••••"
             />
@@ -205,10 +267,9 @@ const Login = () => {
         {message && (
           <div
             className={`mt-6 rounded-lg px-4 py-3 text-sm font-medium
-              ${
-                isSuccess
-                  ? "bg-green-50 text-green-700 ring-1 ring-green-200"
-                  : "bg-red-50 text-red-700 ring-1 ring-red-200"
+              ${isSuccess
+                ? "bg-green-50 text-green-700 ring-1 ring-green-200"
+                : "bg-red-50 text-red-700 ring-1 ring-red-200"
               }`}
           >
             {message}
@@ -228,10 +289,21 @@ const Login = () => {
           </button>
         )}
 
+        {/* Debug info (remove in production) */}
+        {/* {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-2 bg-gray-100 rounded text-xs">
+            <p>Role: {role}</p>
+            <p>Authenticated: {isAuthenticated.toString()}</p>
+            <p>Student stored: {!!localStorage.getItem('studentUser')}</p>
+            <p>Trainer stored: {!!localStorage.getItem('trainerUser')}</p>
+            <p>Token stored: {!!localStorage.getItem('authToken')}</p>
+          </div>
+        )} */}
+
         {/* Footer */}
         <div className="mt-10 space-y-2 text-center text-sm">
           <p className="text-blue-600">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <a
               href="/signup"
               className="font-semibold hover:underline hover:text-blue-800"
@@ -254,4 +326,3 @@ const Login = () => {
 };
 
 export default Login;
-

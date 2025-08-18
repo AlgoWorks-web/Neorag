@@ -100,7 +100,7 @@ const AppointmentForm = () => {
         msg: formData.notes,
       };
 
-      const res = await fetch("https://hydersoft.com/api/bookanappointment", {
+      const res = await fetch("https://hydersoft.com/api/connectingwires/bookanappointment", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
