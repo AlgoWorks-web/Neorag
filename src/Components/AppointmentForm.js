@@ -4,10 +4,9 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { DateTime } from "luxon";
 
-/* Available service options */
 const services = [
   "Web Solutions",
-  "Mobility Solutions",
+  "Mobility Solutions", 
   "Digital Solutions",
   "Branding & Creative",
   "Hosting Solutions",
@@ -16,11 +15,15 @@ const services = [
 
 const AppointmentForm = () => {
   const navigate = useNavigate();
-
-  /* live CST clock */
+  
   const [currentCSTTime, setCurrentCSTTime] = useState(
     DateTime.now().setZone("America/Chicago")
   );
+  
+  // Add state for booked slots
+  const [bookedSlots, setBookedSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
   useEffect(() => {
     const i = setInterval(
       () => setCurrentCSTTime(DateTime.now().setZone("America/Chicago")),
@@ -29,7 +32,6 @@ const AppointmentForm = () => {
     return () => clearInterval(i);
   }, []);
 
-  /* generate 48 half-hour slots: 00:00, 00:30 … 23:30 */
   const timeSlots = useMemo(
     () =>
       Array.from({ length: 48 }, (_, i) =>
@@ -40,7 +42,6 @@ const AppointmentForm = () => {
     []
   );
 
-  /* form state */
   const [formData, setFormData] = useState({
     service: "",
     date: "",
@@ -53,7 +54,55 @@ const AppointmentForm = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  /* handle input changes */
+  // Function to fetch booked slots for a specific date
+  const fetchBookedSlots = async (selectedDate) => {
+    if (!selectedDate) {
+      setBookedSlots([]);
+      return;
+    }
+
+    setLoadingSlots(true);
+    try {
+      const response = await fetch(
+        `https://hydersoft.com/api/connectingwires/booked-slots?date=${selectedDate}`,
+        {
+          method: "GET",
+          headers: {
+            "Accept": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok && data.statusCode === 200) {
+        setBookedSlots(data.data || []);
+      } else {
+        console.error("Failed to fetch booked slots:", data.statusMsg);
+        setBookedSlots([]);
+      }
+    } catch (error) {
+      console.error("Error fetching booked slots:", error);
+      setBookedSlots([]);
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  // Function to check if a time slot is booked
+  const isSlotBooked = (time) => {
+    const cstDateTime = DateTime.fromFormat(
+      `${formData.date} ${time}`,
+      "yyyy-MM-dd HH:mm",
+      { zone: "America/Chicago" }
+    );
+
+    const formattedSlot = `${cstDateTime.toFormat("hh:mm a")} - ${cstDateTime
+      .plus({ hours: 1 })
+      .toFormat("hh:mm a")}`;
+
+    return bookedSlots.includes(formattedSlot);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -62,12 +111,21 @@ const AppointmentForm = () => {
       if (digits.length <= 10) {
         setFormData((p) => ({ ...p, phone: digits }));
       }
+    } else if (name === "date") {
+      setFormData((p) => ({ ...p, [name]: value, time: "" })); // Reset time when date changes
+      fetchBookedSlots(value); // Fetch booked slots for the new date
     } else {
       setFormData((p) => ({ ...p, [name]: value }));
     }
   };
 
-  /* submit */
+  // Fetch booked slots when component mounts and date is already selected
+  useEffect(() => {
+    if (formData.date) {
+      fetchBookedSlots(formData.date);
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -79,8 +137,14 @@ const AppointmentForm = () => {
       return;
     }
 
+    // Check if selected slot is booked (additional client-side validation)
+    if (isSlotBooked(formData.time)) {
+      toast.error("This time slot is no longer available. Please select a different time.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      /* build CST datetime */
       const cstDateTime = DateTime.fromFormat(
         `${formData.date} ${formData.time}`,
         "yyyy-MM-dd HH:mm",
@@ -116,7 +180,7 @@ const AppointmentForm = () => {
       const data = JSON.parse(txt);
 
       if (res.ok && data.statusCode === 200) {
-        toast.success(data.statusMsg || "Appointment booked successfully!we reach you out soon");
+        toast.success(data.statusMsg || "Appointment booked successfully! We'll reach out to you soon.");
         setFormData({
           service: "",
           date: "",
@@ -127,7 +191,11 @@ const AppointmentForm = () => {
           phone: "",
           notes: "",
         });
+        setBookedSlots([]); // Clear booked slots
         setTimeout(() => navigate("/"), 2000);
+      } else if (data.statusCode === 409) {
+        toast.error("This time slot is no longer available. Please refresh and select a different time.");
+        fetchBookedSlots(formData.date); // Refresh booked slots
       } else {
         toast.error(data.statusMsg || "Something went wrong. Please try again.");
       }
@@ -139,12 +207,11 @@ const AppointmentForm = () => {
     }
   };
 
-  /* UI */
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <ToastContainer />
-        {/* header */}
+        
         <div className="text-center mb-12">
           <h1 className="text-3xl font-bold text-customBlue mb-2">
             Book Your Slot Now
@@ -160,14 +227,13 @@ const AppointmentForm = () => {
           </p>
         </div>
 
-        {/* form */}
         <form
           onSubmit={handleSubmit}
           className={`bg-white shadow-sm rounded-lg px-8 pt-6 pb-8 mb-4 border border-gray-200 ${
             loading ? "cursor-wait" : ""
           }`}
         >
-          {/* service */}
+          {/* Service selection */}
           <div className="mb-6">
             <select
               name="service"
@@ -187,7 +253,7 @@ const AppointmentForm = () => {
             </select>
           </div>
 
-          {/* date + half-hour time slot */}
+          {/* Date and time selection */}
           <div className="grid md:grid-cols-2 gap-6 mb-2">
             <div>
               <input
@@ -206,24 +272,33 @@ const AppointmentForm = () => {
                 value={formData.time}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-customBlue focus:border-transparent"
+                disabled={loadingSlots}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-customBlue focus:border-transparent disabled:opacity-50"
               >
                 <option value="" disabled>
-                  Select time…
+                  {loadingSlots ? "Loading slots..." : "Select time…"}
                 </option>
-                {timeSlots.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
+                {timeSlots.map((t) => {
+                  const isBooked = isSlotBooked(t);
+                  return (
+                    <option 
+                      key={t} 
+                      value={t} 
+                      disabled={isBooked}
+                      className={isBooked ? "text-gray-400" : ""}
+                    >
+                      {t} {isBooked ? "(Booked)" : ""}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>
           <p className="text-sm text-gray-500 mb-6 italic">
-            Note: All times are in CST (Central Standard Time)
+            Note: All times are in CST (Central Standard Time). Booked slots are disabled.
           </p>
 
-          {/* full name */}
+          {/* Rest of the form remains the same */}
           <div className="mb-6">
             <input
               type="text"
@@ -236,7 +311,6 @@ const AppointmentForm = () => {
             />
           </div>
 
-          {/* email + phone */}
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div>
               <input
@@ -273,7 +347,6 @@ const AppointmentForm = () => {
             </div>
           </div>
 
-          {/* notes */}
           <div className="mb-8">
             <textarea
               name="notes"
@@ -285,7 +358,6 @@ const AppointmentForm = () => {
             />
           </div>
 
-          {/* submit */}
           <div className="flex justify-center">
             <button
               type="submit"
@@ -324,4 +396,3 @@ const AppointmentForm = () => {
 };
 
 export default AppointmentForm;
-

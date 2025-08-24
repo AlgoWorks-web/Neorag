@@ -119,7 +119,7 @@ function Courses() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredCourses.map((course) => (
-              <div key={course.course_id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              <div key={course.course_id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
                 <div className="aspect-video bg-gray-200 overflow-hidden">
                   <img
                     src={`https://hydersoft.com/${course.thumbnail}`}
@@ -154,11 +154,9 @@ function Courses() {
                       console.log('Image loaded successfully:', `https://hydersoft.com/${course.thumbnail}`);
                     }}
                   />
-
-
                 </div>
 
-                <div className="p-4">
+                <div className="p-4 flex flex-col flex-grow">
                   <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2 leading-tight">
                     {course.title}
                   </h3>
@@ -173,7 +171,7 @@ function Courses() {
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-4">
                     <div className="flex flex-col">
                       <span className="text-lg font-bold text-gray-900">
                         {formatPrice(course.price)}
@@ -198,7 +196,7 @@ function Courses() {
 
                   <button
                     onClick={() => navigate(`/student/course-details/${course.course_id}`)}
-                    className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition-colors duration-200"
+                    className="w-full mt-auto bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition-colors duration-200"
                   >
                     Explore
                   </button>

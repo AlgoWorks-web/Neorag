@@ -32,7 +32,6 @@ function PublicCourses() {
 
     const handleExplore = (courseId) => {
         navigate(`/public-course-details/${courseId}`);
-
     };
 
     const formatPrice = (price) => {
@@ -57,7 +56,6 @@ function PublicCourses() {
     };
 
     return (
-
         <div className="min-h-screen bg-gray-50 py-8">
             <section className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16 rounded-lg shadow mb-10">
                 <div className="max-w-6xl mx-auto px-4 text-center">
@@ -65,9 +63,9 @@ function PublicCourses() {
                     <p className="text-lg md:text-xl mb-6">
                         Learn from expert trainers and unlock new career opportunities with our curated courses.
                     </p>
-                    
                 </div>
             </section>
+            
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Explore Our Courses</h1>
@@ -93,7 +91,7 @@ function PublicCourses() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {filteredCourses.map((course) => (
-                            <div key={course.course_id} className="bg-white rounded-lg shadow hover:shadow-lg overflow-hidden">
+                            <div key={course.course_id} className="bg-white rounded-lg shadow hover:shadow-lg overflow-hidden flex flex-col h-full">
                                 <div className="aspect-video bg-gray-200">
                                     <img
                                         src={`https://hydersoft.com/${course.thumbnail}`}
@@ -129,7 +127,8 @@ function PublicCourses() {
                                         }}
                                     />
                                 </div>
-                                <div className="p-4">
+                                
+                                <div className="p-4 flex flex-col flex-grow">
                                     <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2 leading-tight">
                                         {course.title}
                                     </h3>
@@ -144,7 +143,7 @@ function PublicCourses() {
                                         </p>
                                     )}
 
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between mb-4">
                                         <div className="flex flex-col">
                                             <span className="text-lg font-bold text-gray-900">
                                                 {formatPrice(course.price)}
@@ -169,7 +168,7 @@ function PublicCourses() {
 
                                     <button
                                         onClick={() => handleExplore(course.course_id)}
-                                        className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                                        className="mt-auto w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors duration-200"
                                     >
                                         Explore
                                     </button>

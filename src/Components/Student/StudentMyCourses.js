@@ -376,44 +376,44 @@ function StudentMyCourses() {
 
               return (
                 <div key={enrollment.enrollment_id || `course-${course.course_id}`} 
-                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
                   <div className="aspect-video bg-gray-200 overflow-hidden">
-                        <img
-                    src={`https://hydersoft.com/${course.thumbnail}`}
-                    alt={course.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      console.log('Image failed to load:', `https://hydersoft.com/${course.thumbnail}`);
-                      e.target.onerror = null;
+                    <img
+                      src={`https://hydersoft.com/${course.thumbnail}`}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.log('Image failed to load:', `https://hydersoft.com/${course.thumbnail}`);
+                        e.target.onerror = null;
 
-                      // Try alternative paths if the main path fails
-                      const altPaths = [
-                        `https://hydersoft.com/storage/coursethumbnails/${course.thumbnail.split('/').pop()}`,
-                        `https://hydersoft.com/storage/app/public/coursethumbnails/${course.thumbnail.split('/').pop()}`
-                      ];
+                        // Try alternative paths if the main path fails
+                        const altPaths = [
+                          `https://hydersoft.com/storage/coursethumbnails/${course.thumbnail.split('/').pop()}`,
+                          `https://hydersoft.com/storage/app/public/coursethumbnails/${course.thumbnail.split('/').pop()}`
+                        ];
 
-                      const currentFailedUrl = e.target.src;
+                        const currentFailedUrl = e.target.src;
 
-                      // Try each alternative path
-                      for (let altPath of altPaths) {
-                        if (currentFailedUrl !== altPath) {
-                          console.log('Trying alternative path:', altPath);
-                          e.target.src = altPath;
-                          return;
+                        // Try each alternative path
+                        for (let altPath of altPaths) {
+                          if (currentFailedUrl !== altPath) {
+                            console.log('Trying alternative path:', altPath);
+                            e.target.src = altPath;
+                            return;
+                          }
                         }
-                      }
 
-                      // If all paths fail, use placeholder
-                      console.log('All image paths failed, using placeholder');
-                      e.target.src = createPlaceholderImage();
-                    }}
-                    onLoad={() => {
-                      console.log('Image loaded successfully:', `https://hydersoft.com/${course.thumbnail}`);
-                    }}
-                  />
+                        // If all paths fail, use placeholder
+                        console.log('All image paths failed, using placeholder');
+                        e.target.src = createPlaceholderImage();
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully:', `https://hydersoft.com/${course.thumbnail}`);
+                      }}
+                    />
                   </div>
 
-                  <div className="p-4">
+                  <div className="p-4 flex flex-col flex-grow">
                     <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2 leading-tight">
                       {course.title || 'Course Title'}
                     </h3>
@@ -421,8 +421,6 @@ function StudentMyCourses() {
                     <p className="text-sm text-gray-600 mb-3 line-clamp-3">
                       {course.description || course.bio || 'No description available'}
                     </p>
-
-                  
 
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-lg font-bold text-gray-900">
@@ -433,14 +431,14 @@ function StudentMyCourses() {
                       </span>
                     </div>
 
-                    <div className="text-xs text-gray-500 mb-3">
+                    <div className="text-xs text-gray-500 mb-4">
                       Enrolled: {enrollment.enrollment_date ? 
                         new Date(enrollment.enrollment_date).toLocaleDateString() : 'Unknown'}
                     </div>
 
                     <button
-                      onClick={() => navigate(`/student/schedule`)}
-                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+                      onClick={() => navigate(`/student/videos`)}
+                      className="w-full mt-auto bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
                     >
                       Continue Learning
                     </button>
