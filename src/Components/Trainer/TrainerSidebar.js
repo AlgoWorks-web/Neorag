@@ -134,7 +134,7 @@ const TrainerSidebar = ({ sidebarOpen, toggleSidebar }) => {
         </nav>
 
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
+        {/* <div className="absolute bottom-0 left-0 right-0 p-4">
           <div className="bg-blue-800/50 rounded-lg p-4 border border-blue-600/30">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-to-br from-yellow-400 to-orange-500 p-2 rounded-lg">
@@ -147,7 +147,7 @@ const TrainerSidebar = ({ sidebarOpen, toggleSidebar }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Bottom Gradient */}
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-blue-900/80 to-transparent pointer-events-none"></div>

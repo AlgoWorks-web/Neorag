@@ -860,62 +860,7 @@ const TrainerHome = () => {
         ))}
       </div>
 
-      {/* Enrolled Students by Course Section */}
-      {dashboardData.enrolledStudentsData.enrolled_by_course.length > 0 && (
-        <div className="mb-8">
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <FaGraduationCap className="w-5 h-5 text-blue-500" />
-              Students Enrolled in Your Courses
-            </h2>
-            
-            {/* Course Enrollment Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {dashboardData.enrolledStudentsData.enrolled_by_course.map((course, index) => (
-                <div key={course.course_id || index} className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
-                  <h3 className="font-medium text-gray-800 mb-2 truncate" title={course.title}>
-                    {course.title}
-                  </h3>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-2xl font-bold text-blue-600">{course.student_count}</span>
-                      <span className="text-sm text-gray-600 ml-1">
-                        {course.student_count === 1 ? 'student' : 'students'}
-                      </span>
-                    </div>
-                    < FaArrowUp className="text-blue-500" />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Enrollment Status Summary */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                <div className="text-2xl font-bold text-green-600 mb-1">
-                  {dashboardData.enrolledStudentsData.enrolled_by_status.enrolled}
-                </div>
-                <div className="text-sm text-gray-600 font-medium">Newly Enrolled</div>
-                <div className="text-xs text-gray-500 mt-1">Active enrollments</div>
-              </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <div className="text-2xl font-bold text-yellow-600 mb-1">
-                  {dashboardData.enrolledStudentsData.enrolled_by_status.in_progress}
-                </div>
-                <div className="text-sm text-gray-600 font-medium">In Progress</div>
-                <div className="text-xs text-gray-500 mt-1">Learning actively</div>
-              </div>
-              <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="text-2xl font-bold text-blue-600 mb-1">
-                  {dashboardData.enrolledStudentsData.enrolled_by_status.completed}
-                </div>
-                <div className="text-sm text-gray-600 font-medium">Completed</div>
-                <div className="text-xs text-gray-500 mt-1">Course finished</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+     
 
       {/* Today's Classes Section */}
       {dashboardData.todayClassesList.length > 0 && (
@@ -1024,57 +969,7 @@ const TrainerHome = () => {
         </div>
       </div>
 
-      {/* Recent Enrollments Section */}
-      {dashboardData.enrolledStudentsData.recent_enrollments.length > 0 && (
-        <div className="mb-8">
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-500" />
-              Recent Enrollments (Last 30 Days)
-            </h2>
-            <div className="space-y-3">
-              {dashboardData.enrolledStudentsData.recent_enrollments.slice(0, 5).map((enrollment) => (
-                <div key={enrollment.enrollment_id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-800">{enrollment.student_name}</p>
-                    <p className="text-sm text-gray-600">{enrollment.course_title}</p>
-                    <p className="text-xs text-gray-500">{new Date(enrollment.enrollment_date).toLocaleDateString()}</p>
-                  </div>
-                  <div className="text-right ml-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      enrollment.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      enrollment.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
-                      {enrollment.status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </span>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="w-16 bg-gray-200 rounded-full h-1.5">
-                        <div 
-                          className={`h-1.5 rounded-full ${
-                            enrollment.progress === 100 ? 'bg-green-500' :
-                            enrollment.progress > 0 ? 'bg-yellow-500' : 'bg-gray-400'
-                          }`}
-                          style={{ width: `${enrollment.progress}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-xs text-gray-500">{enrollment.progress}%</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {dashboardData.enrolledStudentsData.recent_enrollments.length > 5 && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-500">
-                  Showing 5 of {dashboardData.enrolledStudentsData.recent_enrollments.length} recent enrollments
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+    
     </div>
   );
 };

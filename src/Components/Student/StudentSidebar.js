@@ -168,7 +168,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
         </div> */}
         
         {/* Footer */}
-        <div className="px-4 pt-4 border-t border-indigo-700/50">
+        {/* <div className="px-4 pt-4 border-t border-indigo-700/50">
           <div className="text-center">
             <div className="text-indigo-300 text-xs font-medium mb-1">
               &copy; {new Date().getFullYear()} LearnHub LMS
@@ -177,7 +177,7 @@ const StudentSidebar = ({ sidebarOpen, toggleSidebar }) => {
               Empowering Students
             </div>
           </div>
-        </div>
+        </div> */}
         
         {/* Bottom Gradient */}
         <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-purple-900/80 to-transparent pointer-events-none"></div>
