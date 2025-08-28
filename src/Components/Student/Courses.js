@@ -19,7 +19,8 @@ function Courses() {
     } else {
       const lowercasedQuery = searchQuery.toLowerCase();
       const filtered = courses.filter(course =>
-        course.title.toLowerCase().includes(lowercasedQuery)
+        course.title.toLowerCase().includes(lowercasedQuery) ||
+        (course.trainer && course.trainer.name && course.trainer.name.toLowerCase().includes(lowercasedQuery))
       );
       setFilteredCourses(filtered);
     }
@@ -35,6 +36,7 @@ function Courses() {
       }
 
       const data = await response.json();
+      console.log('Fetched courses:', data); // Debug log
       setCourses(data);
     } catch (err) {
       setError(err.message);
@@ -103,7 +105,7 @@ function Courses() {
         <div className="mb-6">
           <input
             type="text"
-            placeholder="Search by course title..."
+            placeholder="Search by course title or trainer name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full sm:w-1/2 border border-gray-300 rounded px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -120,6 +122,7 @@ function Courses() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredCourses.map((course) => (
               <div key={course.course_id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
+                {/* Course Image */}
                 <div className="aspect-video bg-gray-200 overflow-hidden">
                   <img
                     src={`https://hydersoft.com/${course.thumbnail}`}
@@ -157,48 +160,88 @@ function Courses() {
                 </div>
 
                 <div className="p-4 flex flex-col flex-grow">
-                  <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2 leading-tight">
+                  {/* Course Title */}
+                  <h3 className="font-semibold text-lg text-gray-900 mb-3 line-clamp-2 leading-tight">
                     {course.title}
                   </h3>
 
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-3">
+                  {/* Course Description */}
+                  {/* <p className="text-sm text-gray-600 mb-3 line-clamp-3">
                     {course.description}
-                  </p>
+                  </p> */}
 
-                  {course.bio && (
-                    <p className="text-xs text-gray-500 mb-3 line-clamp-2">
-                      {course.bio}
-                    </p>
+                  {/* Trainer Information */}
+                  {course.trainer ? (
+                    <div className="mb-3 p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-white text-sm font-semibold">
+                            {course.trainer_name ? course.trainer_name.charAt(0).toUpperCase() : 'T'}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-blue-900">
+                            {course.trainer.trainer_name || 'Unknown Trainer'}
+                          </p>
+                        </div>
+                      </div>
+                      {course.trainer.bio && (
+                        <p className="text-xs text-blue-700 line-clamp-2 ml-11">
+                          {course.trainer.bio}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-white text-sm font-semibold">?</span>
+                        </div>
+                        <p className="text-sm text-gray-600">No trainer assigned</p>
+                      </div>
+                    </div>
                   )}
 
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex flex-col">
-                      <span className="text-lg font-bold text-gray-900">
-                        {formatPrice(course.price)}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        Created: {new Date(course.created_on).toLocaleDateString()}
-                      </span>
-                    </div>
+                  {/* Course Bio */}
+                  {/* {course.bio && (
+                    <p className="text-xs text-gray-500 mb-3 line-clamp-2 bg-gray-50 p-2 rounded">
+                      <span className="font-medium">Course Info:</span> {course.bio}
+                    </p>
+                  )} */}
 
-                    <div className="flex items-center">
+                  {/* Status Badge and Created Date */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
                       {course.is_active ? (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Active
+                          ✓ Active
                         </span>
                       ) : (
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          Inactive
+                          ✗ Inactive
                         </span>
                       )}
                     </div>
+                    <span className="text-xs text-gray-500">
+                      {new Date(course.created_on).toLocaleDateString()}
+                    </span>
                   </div>
 
+                  {/* Price - Bottom above explore button */}
+                  <div className="mt-auto mb-3">
+                    <div className="text-center py-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                      <span className="text-2xl font-bold text-blue-600">
+                        {formatPrice(course.price)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Explore Button */}
                   <button
                     onClick={() => navigate(`/student/course-details/${course.course_id}`)}
-                    className="w-full mt-auto bg-blue-600 text-white py-2 px-4 rounded font-medium hover:bg-blue-700 transition-colors duration-200"
+                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200 shadow-sm hover:shadow-md"
                   >
-                    Explore
+                    Explore Course
                   </button>
                 </div>
               </div>

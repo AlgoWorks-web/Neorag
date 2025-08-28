@@ -204,7 +204,7 @@ const HomePage = () => {
               Get Started Free
             </Link>
             <Link 
-              to="/pricing" 
+              to="/publiccourses" 
               className="px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-amber-600 transition-all"
             >
               View Pricing Plans

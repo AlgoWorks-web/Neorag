@@ -72,6 +72,8 @@ import PrivateRoute from '../src/auth/PrivateRoute';
 // 404 component
 import NotFound from './Components/NotFound';
 import ChangePassword from "./Components/Trainer/ChangePassword";
+import Faqs from "./Components/Faqs";
+import AdminFAQ from "./Components/Admin/AdminFaqs";
 
 
 function AppContent() {
@@ -82,7 +84,7 @@ function AppContent() {
     "/", "/services", "/contact", "/login", "/signup", "/about", "/pricing",
     "/case-studies", "/business", "/terms", "/sla", "/privacy", "/publiccourses",
     "/forgot-password", "/book-appointment", "/pricingplans", "/Allcourses",
-    "/public-course-details/"
+    "/public-course-details/","/publicfaqs"
   ];
 
   // If on a dashboard/admin/trainer/student route OR on NotFound = hide Navbar/Footer
@@ -127,6 +129,7 @@ function AppContent() {
         <Route path="/book-appointment" element={<AppointmentForm />} />
         <Route path="/pricingplans" element={<PricingPlans />} />
         <Route path="/Allcourses" element={<AllCoursestogether />} />
+        <Route path="/publicfaqs" element={<Faqs/>}/>
 
         {/* Admin Routes */}
         <Route path="/supremehandling" element={<AdminLogin />} />
@@ -146,6 +149,7 @@ function AppContent() {
           <Route path="agreements" element={<Agreements />} />
           <Route path="contactinfo" element={<ContactInfo />} />
           <Route path="appointmentinfo" element={<AppointmentInfo />} />
+          <Route path="faqs" element={<AdminFAQ/>}/>
         </Route>
 
         {/* Trainer Routes */}

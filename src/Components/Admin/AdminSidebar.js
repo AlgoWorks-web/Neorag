@@ -66,6 +66,11 @@ const AdminSidebar = ({ sidebarOpen, toggleSidebar }) => {
       to: "/admin-home/appointmentinfo",
       icon: <Calendar className="w-5 h-5" />,
       label: "Appointments"
+    },
+     {
+      to: "/admin-home/faqs",
+      icon: <Calendar className="w-5 h-5" />,
+      label: "Faqs"
     }
   ];
 
