@@ -135,9 +135,11 @@ function AdminTrainers() {
   };
 
   // Handle phone number change from PhoneInput component
-  const handlePhoneChange = (value) => {
-    setFormData({ ...formData, phone_number: value });
-  };
+const handlePhoneChange = (value) => {
+  console.log(value); 
+  setFormData({ ...formData, phone_number: value });
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -148,7 +150,7 @@ function AdminTrainers() {
     data.append('bio', formData.bio);
     data.append('expertise', formData.expertise);
     data.append('location', formData.location);
-    data.append('phone_number', formData.phone_number); // Already includes country code
+    data.append('phone_number', formData.phone_number); 
 
     if (!editTrainerId && formData.email) {
       data.append('email', formData.email);
@@ -382,7 +384,7 @@ function AdminTrainers() {
                         {trainer.phone_number && (
                           <div className="text-sm text-gray-500 flex items-center mt-1">
                             <FaPhone className="mr-2 text-gray-400" />
-                            {trainer.phone_number}
+                            +{trainer.phone_number}
                           </div>
                         )}
                       </td>
