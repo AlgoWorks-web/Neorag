@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTrash, FaChevronDown, FaChevronUp, FaSearch, FaUserPlus, FaUser, FaEnvelope, FaMapMarkerAlt, FaPhone } from 'react-icons/fa';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 function AdminTrainers() {
   const [showForm, setShowForm] = useState(false);
@@ -27,7 +29,7 @@ function AdminTrainers() {
     const fetchTrainers = async () => {
       try {
         setLoading(true);
-        setError(null); // Clear previous errors
+        setError(null);
 
         console.log(`Fetching trainers: page=${currentPage}, per_page=${perPage}`);
 
@@ -35,8 +37,6 @@ function AdminTrainers() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            // Add authorization header if needed
-            // 'Authorization': `Bearer ${token}`,
           },
         });
 
@@ -44,7 +44,6 @@ function AdminTrainers() {
         console.log('Response headers:', response.headers);
 
         if (!response.ok) {
-          // Handle HTTP errors
           const errorText = await response.text();
           console.error('HTTP Error Response:', errorText);
           throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
@@ -53,13 +52,11 @@ function AdminTrainers() {
         const data = await response.json();
         console.log('API Response:', data);
 
-        // Check if response has expected structure
         if (!data) {
           throw new Error('No data received from server');
         }
 
         if (data.success === true || data.success === 'true') {
-          // Handle successful response
           const trainersData = data.data || data.trainers || [];
           const metaData = data.meta || data.metadata || {};
 
@@ -68,13 +65,10 @@ function AdminTrainers() {
 
           console.log('Trainers loaded:', trainersData.length);
         } else if (data.error) {
-          // Handle API error response
           throw new Error(data.error || data.message || 'API returned an error');
         } else {
-          // Handle unexpected response format
           console.warn('Unexpected response format:', data);
 
-          // Try to extract trainers from various possible structures
           if (Array.isArray(data)) {
             setTrainers(data);
             setTotalTrainers(data.length);
@@ -91,7 +85,6 @@ function AdminTrainers() {
       } catch (err) {
         console.error('Error fetching trainers:', err);
 
-        // Provide more specific error messages
         let errorMessage = 'Failed to fetch trainers';
 
         if (err.name === 'TypeError' && err.message.includes('fetch')) {
@@ -105,7 +98,7 @@ function AdminTrainers() {
         }
 
         setError(errorMessage);
-        setTrainers([]); // Reset trainers on error
+        setTrainers([]);
         setTotalTrainers(0);
       } finally {
         setLoading(false);
@@ -141,7 +134,10 @@ function AdminTrainers() {
     }
   };
 
-
+  // Handle phone number change from PhoneInput component
+  const handlePhoneChange = (value) => {
+    setFormData({ ...formData, phone_number: value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -152,7 +148,7 @@ function AdminTrainers() {
     data.append('bio', formData.bio);
     data.append('expertise', formData.expertise);
     data.append('location', formData.location);
-    data.append('phone_number', formData.phone_number);
+    data.append('phone_number', formData.phone_number); // Already includes country code
 
     if (!editTrainerId && formData.email) {
       data.append('email', formData.email);
@@ -173,41 +169,31 @@ function AdminTrainers() {
         method: 'POST',
         body: data,
         headers: {
-          // Add Accept header to explicitly request JSON
           'Accept': 'application/json',
-          // Don't set Content-Type for FormData
         },
       });
 
       console.log('Response status:', response.status);
       console.log('Response headers:', [...response.headers.entries()]);
 
-      // Get the response text first
       const responseText = await response.text();
       console.log('Raw response:', responseText);
 
-      // Check content type
       const contentType = response.headers.get('content-type') || '';
 
       if (response.status === 200) {
-        // Handle successful response
         if (contentType.includes('application/json')) {
-          // Parse as JSON
           const result = JSON.parse(responseText);
           console.log('Parsed JSON result:', result);
-
           alert(editTrainerId ? 'Trainer updated successfully.' : 'Trainer onboarded successfully.');
         } else if (contentType.includes('text/html')) {
-          // Server returned HTML but with 200 status - likely a success page
           console.log('Server returned HTML success page');
           alert(editTrainerId ? 'Trainer updated successfully.' : 'Trainer onboarded successfully.');
         } else {
-          // Unknown content type but 200 status
           console.log('Unknown content type but successful status');
           alert(editTrainerId ? 'Trainer updated successfully.' : 'Trainer onboarded successfully.');
         }
 
-        // Reset form and close modal
         setFormData({
           trainerName: '',
           email: '',
@@ -220,13 +206,10 @@ function AdminTrainers() {
 
         setShowForm(false);
         setEditTrainerId(null);
-
-        // Refresh the trainers list
         setCurrentPage(1);
-        window.location.reload(); // Or implement a better refresh mechanism
+        window.location.reload();
 
       } else {
-        // Handle error responses
         if (contentType.includes('application/json')) {
           const result = JSON.parse(responseText);
           alert(result.message || result.error || 'Something went wrong.');
@@ -254,10 +237,6 @@ function AdminTrainers() {
     }
   };
 
-
-
-
-
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this trainer?')) return;
 
@@ -279,12 +258,9 @@ function AdminTrainers() {
     }
   };
 
-
-  // Retry function for failed requests
   const handleRetry = () => {
     setError(null);
     setLoading(true);
-    // Force re-fetch by updating a dependency
     setCurrentPage(prev => prev);
   };
 
@@ -313,7 +289,6 @@ function AdminTrainers() {
           </button>
         </div>
       </div>
-
 
       {/* Trainers List */}
       {loading ? (
@@ -369,7 +344,6 @@ function AdminTrainers() {
                   filteredTrainers.map((trainer, index) => (
                     <tr key={trainer.id || trainer.email || index} className="hover:bg-gray-50">
                       <td className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-xs sm:text-sm">
-
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10">
                             {trainer.profile_pic || trainer.profilePic ? (
@@ -429,14 +403,14 @@ function AdminTrainers() {
                           onClick={() => {
                             setFormData({
                               trainerName: trainer.trainer_name || '',
-                              email: trainer.email || '', // readonly field
+                              email: trainer.email || '',
                               profilePic: null,
                               bio: trainer.bio || '',
                               expertise: trainer.expertise || '',
                               location: trainer.location || '',
                               phone_number: trainer.phone_number || '',
                             });
-                            setEditTrainerId(trainer.trainer_id); // set to enter edit mode
+                            setEditTrainerId(trainer.trainer_id);
                             setShowForm(true);
                           }}
                         >
@@ -449,7 +423,6 @@ function AdminTrainers() {
                         >
                           <FaTrash />
                         </button>
-
                       </td>
                     </tr>
                   ))
@@ -535,11 +508,10 @@ function AdminTrainers() {
               </div>
             </div>
           )}
-
-
         </div>
       )}
 
+      {/* Mobile Card View */}
       <div className="md:hidden space-y-4 px-4 py-2">
         {filteredTrainers.length === 0 ? (
           <div className="text-center text-gray-500">
@@ -635,17 +607,31 @@ function AdminTrainers() {
         )}
       </div>
 
-      {/* Modal form */}
+      {/* Modal form with React Phone Input */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto relative">
             <button
-              onClick={() => setShowForm(false)}
+              onClick={() => {
+                setShowForm(false);
+                setEditTrainerId(null);
+                setFormData({
+                  trainerName: '',
+                  email: '',
+                  profilePic: null,
+                  bio: '',
+                  expertise: '',
+                  location: '',
+                  phone_number: '',
+                });
+              }}
               className="absolute top-2 right-2 text-gray-500 hover:text-black text-2xl"
             >
               ×
             </button>
-            <h3 className="text-xl font-semibold mb-4">Add Trainer</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              {editTrainerId ? 'Edit Trainer' : 'Add Trainer'}
+            </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium">Trainer Name</label>
@@ -655,9 +641,10 @@ function AdminTrainers() {
                   value={formData.trainerName}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded px-3 py-2 mt-1"
+                  className="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              
               <div>
                 <label className="block text-sm font-medium">Email</label>
                 <input
@@ -666,10 +653,14 @@ function AdminTrainers() {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded px-3 py-2 mt-1"
+                  className="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={!!editTrainerId}
                 />
+                {editTrainerId && (
+                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed when editing</p>
+                )}
               </div>
+              
               <div>
                 <label className="block text-sm font-medium">Profile Pic</label>
                 <input
@@ -677,18 +668,22 @@ function AdminTrainers() {
                   name="profilePic"
                   accept="image/*"
                   onChange={handleChange}
-                  className="w-full mt-1"
+                  className="w-full mt-1 text-sm file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                 />
               </div>
+              
               <div>
                 <label className="block text-sm font-medium">Bio (Optional)</label>
                 <textarea
                   name="bio"
                   value={formData.bio}
                   onChange={handleChange}
-                  className="w-full border rounded px-3 py-2 mt-1"
+                  rows="3"
+                  className="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Brief bio about the trainer..."
                 ></textarea>
               </div>
+              
               <div>
                 <label className="block text-sm font-medium">Expertise</label>
                 <textarea
@@ -696,9 +691,12 @@ function AdminTrainers() {
                   value={formData.expertise}
                   onChange={handleChange}
                   required
-                  className="w-full border rounded px-3 py-2 mt-1"
+                  rows="3"
+                  className="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Areas of expertise, skills, technologies..."
                 ></textarea>
               </div>
+              
               <div>
                 <label className="block text-sm font-medium">Location</label>
                 <input
@@ -706,24 +704,55 @@ function AdminTrainers() {
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
-                  className="w-full border rounded px-3 py-2 mt-1"
+                  className="w-full border rounded px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="City, Country"
                 />
               </div>
+              
+              {/* NEW: Phone Number with react-phone-input-2 */}
               <div>
-                <label className="block text-sm font-medium">Phone Number</label>
-                <input
-                  type="text"
-                  name="phone_number"
+                <label className="block text-sm font-medium mb-2">Phone Number</label>
+                <PhoneInput
+                  country={'us'} // Default country
                   value={formData.phone_number}
-                  onChange={handleChange}
-                  className="w-full border rounded px-3 py-2 mt-1"
+                  onChange={handlePhoneChange}
+                  inputStyle={{
+                    width: '100%',
+                    height: '40px',
+                    fontSize: '14px',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    paddingLeft: '48px',
+                  }}
+                  containerStyle={{
+                    width: '100%',
+                  }}
+                  dropdownStyle={{
+                    maxHeight: '200px',
+                    overflowY: 'auto',
+                  }}
+                  buttonStyle={{
+                    borderRadius: '8px 0 0 8px',
+                    border: '1px solid #d1d5db',
+                    backgroundColor: '#f9fafb',
+                  }}
+                  countryCodeEditable={true}
+                  enableSearch={true}
+                  searchPlaceholder="Search countries..."
+                  placeholder="Enter phone number"
+                  specialLabel=""
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Select your country and enter your phone number
+                </p>
               </div>
+              
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full text-white py-2 rounded flex justify-center items-center ${isSubmitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
+                className={`w-full text-white py-2 rounded flex justify-center items-center transition-colors ${
+                  isSubmitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
                 {isSubmitting ? (
                   <div className="flex items-center">
@@ -747,22 +776,17 @@ function AdminTrainers() {
                         d="M4 12a8 8 0 018-8v8z"
                       ></path>
                     </svg>
-                    Submitting...
+                    {editTrainerId ? 'Updating...' : 'Submitting...'}
                   </div>
                 ) : (
-                  'Submit'
+                  editTrainerId ? 'Update Trainer' : 'Add Trainer'
                 )}
               </button>
             </form>
           </div>
         </div>
       )}
-
     </div>
-
-
-
-
   );
 }
 

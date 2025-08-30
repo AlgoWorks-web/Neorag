@@ -5,6 +5,7 @@ function MaterialUploader() {
   const [materials, setMaterials] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [date, setDate] = useState(''); // New date state
   const [file, setFile] = useState(null);
   const [courseId, setCourseId] = useState('');
   const [uploadMessage, setUploadMessage] = useState('');
@@ -40,6 +41,20 @@ function MaterialUploader() {
     }
 
     return null;
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
   };
 
   // Handle file selection with validation
@@ -207,6 +222,11 @@ function MaterialUploader() {
     formData.append('title', title);
     formData.append('description', description);
     formData.append('course_id', courseId);
+    
+    // Add date to form data
+    if (date) {
+      formData.append('date', date);
+    }
 
     if (file) {
       formData.append('file', file);
@@ -303,6 +323,7 @@ function MaterialUploader() {
     setEditingMaterial(materialToEdit);
     setTitle(materialToEdit.title);
     setDescription(materialToEdit.description || '');
+    setDate(materialToEdit.date || ''); // Set date for editing
     setCourseId(materialToEdit.course_id);
     setFile(null);
     setShowModal(true);
@@ -317,6 +338,7 @@ function MaterialUploader() {
   const resetForm = () => {
     setTitle('');
     setDescription('');
+    setDate(''); // Reset date
     setFile(null);
     setEditingMaterial(null);
     setShowModal(false);
@@ -413,6 +435,7 @@ function MaterialUploader() {
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Course ID</th>
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Title</th>
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Description</th>
+              <th className="px-4 py-3 border text-sm font-medium text-gray-700">Date</th> {/* New Date Column */}
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">File</th>
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Actions</th>
             </tr>
@@ -420,7 +443,7 @@ function MaterialUploader() {
           <tbody>
             {!courseId ? (
               <tr>
-                <td colSpan="5" className="text-center py-8 text-gray-500">Please select a course to view materials.</td>
+                <td colSpan="6" className="text-center py-8 text-gray-500">Please select a course to view materials.</td>
               </tr>
             ) : Array.isArray(materials) && materials.length > 0 ? (
               materials.map(material => (
@@ -430,6 +453,7 @@ function MaterialUploader() {
                   <td className="px-4 py-3 border text-sm max-w-xs truncate" title={material.description}>
                     {material.description || '-'}
                   </td>
+                  <td className="px-4 py-3 border text-sm text-center">{formatDate(material.date)}</td> {/* Display Date */}
                   <td className="px-4 py-3 border text-blue-600 underline text-sm">
                     {getFileUrl(material) ? (
                       <a href={getFileUrl(material)} target="_blank" rel="noreferrer" className="hover:text-blue-800">Download</a>
@@ -461,7 +485,7 @@ function MaterialUploader() {
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="text-center py-8 text-gray-500">
+                <td colSpan="6" className="text-center py-8 text-gray-500">
                   {courseId ? 'No materials uploaded yet for this course.' : 'Select a course to view materials.'}
                 </td>
               </tr>
@@ -516,6 +540,12 @@ function MaterialUploader() {
                       <p className="text-gray-900 mt-1">{material.description}</p>
                     </div>
                   )}
+
+                  {/* Date in Mobile View */}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Date:</span>
+                    <span className="font-medium">{formatDate(material.date)}</span>
+                  </div>
                   
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">File:</span>
@@ -589,6 +619,21 @@ function MaterialUploader() {
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Enter material description..."
                 ></textarea>
+              </div>
+
+              {/* New Date Field */}
+              <div>
+                <label className="block mb-1 font-medium text-sm sm:text-base">Date</label>
+                <input
+                  type="date"
+                  className="w-full border border-gray-300 px-3 py-2 rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]} // Prevent future dates
+                />
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                  Select the date for this material (optional)
+                </p>
               </div>
               
               <div>

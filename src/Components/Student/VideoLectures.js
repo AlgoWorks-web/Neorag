@@ -418,6 +418,7 @@ function VideoLectures() {
                       key={selectedVideo.video_id}
                       className="w-full h-full"
                       controls
+                      controlsList="nodownload"
                       preload="metadata"
                       crossOrigin="anonymous"
                       onTimeUpdate={handleTimeUpdate}
@@ -534,12 +535,12 @@ function VideoLectures() {
                           key={video.video_id}
                           onClick={() => handleVideoSelect(video)}
                           className={`cursor-pointer transition-all duration-200 ${viewMode === 'grid'
-                              ? `p-4 rounded-lg border-2 hover:shadow-md ${selectedVideo?.video_id === video.video_id
-                                ? 'border-blue-500 bg-blue-50'
-                                : 'border-gray-200 hover:border-gray-300'
-                              }`
-                              : `p-4 hover:bg-gray-50 ${selectedVideo?.video_id === video.video_id ? 'bg-blue-50' : ''
-                              }`
+                            ? `p-4 rounded-lg border-2 hover:shadow-md ${selectedVideo?.video_id === video.video_id
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                            }`
+                            : `p-4 hover:bg-gray-50 ${selectedVideo?.video_id === video.video_id ? 'bg-blue-50' : ''
+                            }`
                             }`}
                         >
                           <div className="flex items-start gap-3">

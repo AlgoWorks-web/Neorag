@@ -22,6 +22,20 @@ function VideoUploader() {
   const token = localStorage.getItem('authToken');
   const trainerUser = JSON.parse(localStorage.getItem('trainerUser') || '{}');
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   // File validation function
   const validateFile = (file) => {
     const allowedTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-ms-wmv'];
@@ -218,12 +232,6 @@ function VideoUploader() {
     });
   };
 
-  // In your handleUpload function, before the API call
-  console.log('=== UPLOAD DEBUG ===');
-  console.log('Course ID being uploaded to:', courseId);
-  console.log('Trainer user data:', trainerUser);
-  console.log('Token:', token?.substring(0, 20) + '...');
-
   // Enhanced upload handler
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -247,7 +255,7 @@ function VideoUploader() {
     formData.append('course_id', courseId);
 
     if (video) {
-      formData.append('video', video); // ✅ FIXED: Use 'video' not 'video_path'
+      formData.append('video', video); // Use 'video' not 'video_path'
     }
 
     // Debug: Log FormData contents
@@ -303,7 +311,6 @@ function VideoUploader() {
       setUploadProgress(0);
     }
   };
-
 
   // Enhanced delete handler
   const handleDelete = async (id) => {
@@ -474,7 +481,7 @@ function VideoUploader() {
         </div>
       )}
 
-      {/* Desktop Table View */}
+      {/* Desktop Table View with Date Column */}
       <div className="hidden lg:block overflow-x-auto">
         <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
           <thead className="bg-gray-100">
@@ -482,6 +489,7 @@ function VideoUploader() {
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Course ID</th>
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Title</th>
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Description</th>
+              <th className="px-4 py-3 border text-sm font-medium text-gray-700">Date</th> {/* NEW DATE COLUMN */}
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Sequence</th>
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Video</th>
               <th className="px-4 py-3 border text-sm font-medium text-gray-700">Actions</th>
@@ -490,7 +498,7 @@ function VideoUploader() {
           <tbody>
             {!courseId ? (
               <tr>
-                <td colSpan="6" className="text-center py-8 text-gray-500">Please select a course to view videos.</td>
+                <td colSpan="7" className="text-center py-8 text-gray-500">Please select a course to view videos.</td>
               </tr>
             ) : Array.isArray(videos) && videos.length > 0 ? (
               videos.map(video => (
@@ -500,6 +508,7 @@ function VideoUploader() {
                   <td className="px-4 py-3 border text-sm max-w-xs truncate" title={video.description}>
                     {video.description || '-'}
                   </td>
+                  <td className="px-4 py-3 border text-sm text-center">{formatDate(video.created_at)}</td> {/* DISPLAY DATE FROM created_at */}
                   <td className="px-4 py-3 border text-center text-sm">{video.sequence}</td>
                   <td className="px-4 py-3 border text-blue-600 underline text-sm">
                     {getVideoUrl(video) ? (
@@ -518,10 +527,11 @@ function VideoUploader() {
                     </span>
                     <span
                       onClick={() => handleDelete(video.video_id || video.id)}
-                      className={`cursor-pointer hover:text-red-800 text-lg ${deletingVideo === (video.video_id || video.id)
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-red-600'
-                        }`}
+                      className={`cursor-pointer hover:text-red-800 text-lg ${
+                        deletingVideo === (video.video_id || video.id)
+                          ? 'text-gray-400 cursor-not-allowed'
+                          : 'text-red-600'
+                      }`}
                       title={deletingVideo === (video.video_id || video.id) ? "Deleting..." : "Delete video"}
                     >
                       {deletingVideo === (video.video_id || video.id) ? '⏳' : '🗑️'}
@@ -531,7 +541,7 @@ function VideoUploader() {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="text-center py-8 text-gray-500">
+                <td colSpan="7" className="text-center py-8 text-gray-500">
                   {courseId ? 'No videos uploaded yet for this course.' : 'Select a course to view videos.'}
                 </td>
               </tr>
@@ -540,7 +550,7 @@ function VideoUploader() {
         </table>
       </div>
 
-      {/* Mobile Card View */}
+      {/* Mobile Card View with Date */}
       <div className="lg:hidden">
         {!courseId ? (
           <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
@@ -562,10 +572,11 @@ function VideoUploader() {
                     </span>
                     <span
                       onClick={() => handleDelete(video.video_id || video.id)}
-                      className={`cursor-pointer hover:text-red-800 text-lg ${deletingVideo === (video.video_id || video.id)
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-red-600'
-                        }`}
+                      className={`cursor-pointer hover:text-red-800 text-lg ${
+                        deletingVideo === (video.video_id || video.id)
+                          ? 'text-gray-400 cursor-not-allowed'
+                          : 'text-red-600'
+                      }`}
                       title={deletingVideo === (video.video_id || video.id) ? "Deleting..." : "Delete video"}
                     >
                       {deletingVideo === (video.video_id || video.id) ? '⏳' : '🗑️'}
@@ -585,6 +596,12 @@ function VideoUploader() {
                       <p className="text-gray-900 mt-1">{video.description}</p>
                     </div>
                   )}
+
+                  {/* Date in Mobile View */}
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Date:</span>
+                    <span className="font-medium">{formatDate(video.created_at)}</span>
+                  </div>
 
                   <div className="flex justify-between">
                     <span className="text-gray-600">Sequence:</span>
